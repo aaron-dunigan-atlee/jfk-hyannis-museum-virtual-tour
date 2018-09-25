@@ -8,6 +8,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.RenderersFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -28,6 +47,17 @@ public class MediaPlayerFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private SimpleExoPlayer mExoPlayer;
+    private String mMediaUrl;
+    private long exoPlayerPlaybackPosition = 0;
+    private int exoPlayerWindowIndex = 0;
+    private boolean exoPlayerAutoPlay = true;
+    private static final String PLAYBACK_POSITION = "playback_position";
+    private static final String WINDOW_INDEX = "window_index";
+    private static final String AUTOPLAY = "autoplay";
+
+    // Layout view variables to be bound using ButterKnife.
+    @BindView(R.id.player_view) PlayerView mExoPlayerView;
 
     public MediaPlayerFragment() {
         // Required empty public constructor
@@ -64,7 +94,19 @@ public class MediaPlayerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_media_player, container, false);
+        View rootView =  inflater.inflate(R.layout.fragment_media_player, container, false);
+        ButterKnife.bind(this, rootView);
+
+        // Get the media to be played, and load previous state of player if applicable.
+        // TODO: Load proper media resource.
+        mMediaUrl = getString(R.string.sample_video_URL);
+        if (savedInstanceState != null) {
+            exoPlayerAutoPlay = savedInstanceState.getBoolean(AUTOPLAY, false);
+            exoPlayerWindowIndex = savedInstanceState.getInt(WINDOW_INDEX, 0);
+            exoPlayerPlaybackPosition = savedInstanceState.getLong(PLAYBACK_POSITION, 0);
+        }
+
+        return rootView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -91,6 +133,7 @@ public class MediaPlayerFragment extends Fragment {
         mListener = null;
     }
 
+    // TODO: Probably remove this interface. No need for interaction with this fragment, right?
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -104,5 +147,53 @@ public class MediaPlayerFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initializePlayer(Uri.parse(mMediaUrl));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        releasePlayer();
+    }
+
+    // Initialize ExoPlayer.  See https://google.github.io/ExoPlayer/guide.html
+    public void initializePlayer(Uri mediaUri) {
+        Context context = getContext();
+        if (mExoPlayer == null) {
+            TrackSelector trackSelector = new DefaultTrackSelector();
+            LoadControl loadControl = new DefaultLoadControl();
+            RenderersFactory renderersFactory = new DefaultRenderersFactory(context);
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector, loadControl);
+            mExoPlayerView.setPlayer(mExoPlayer);
+            //Prepare media source.  See https://google.github.io/ExoPlayer/guide.html#preparing-the-player
+            String appName = getString(R.string.app_name);
+            String userAgent = Util.getUserAgent(context, appName);
+            MediaSource mediaSource = new ExtractorMediaSource.Factory(
+                    new DefaultDataSourceFactory(context, userAgent)).createMediaSource(mediaUri);
+            mExoPlayer.prepare(mediaSource);
+            mExoPlayer.setPlayWhenReady(exoPlayerAutoPlay);
+            mExoPlayer.seekTo(exoPlayerWindowIndex, exoPlayerPlaybackPosition);
+        }
+    }
+
+    // Release ExoPlayer
+    private void releasePlayer() {
+        // Get current state of player before releasing, in case we need to
+        // restore the player state/position later (e.g. on screen rotation).
+        exoPlayerPlaybackPosition = mExoPlayer.getCurrentPosition();
+        exoPlayerWindowIndex = mExoPlayer.getCurrentWindowIndex();
+        // getPlayWhenReady() will be true if player is currently playing; false otherwise.
+        // Therefore, this tells us whether to continue playing when the activity resumes, or just
+        // queue up the track in paused state.
+        // See https://github.com/google/ExoPlayer/issues/3570
+        exoPlayerAutoPlay = mExoPlayer.getPlayWhenReady();
+        mExoPlayer.stop();
+        mExoPlayer.release();
+        mExoPlayer = null;
     }
 }

@@ -13,4 +13,9 @@
     <string name="title_activity_barcode_scan">BarcodeScanActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="sample_video_URL">https://d17h27t6h515a5.cloudfront.net/topher/2017/April/58ffd974_-intro-creampie/-intro-creampie.mp4</string>
+    <string name="no_camera_app">Cannot take picture. No camera app found.</string>
+    <string name="no_barcode_detector">Could not load barcode detector!</string>
+    <string name="no_barcode_in_image">No barcode was detected in that image.</string>
+    <string name="multiple_barcodes_in_image">Too many barcodes.  Scan just one at a time.</string>
 </resources>
