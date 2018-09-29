@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">JFK Hyannis Museum Virtual Tour</string>
+    <string name="app_name">JFK Hyannis Museum Enhanced Tour</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">JFK Hyannis Museum</string>
+    <string name="nav_header_subtitle">Enhanced Tour</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
@@ -18,4 +18,10 @@
     <string name="no_barcode_detector">Could not load barcode detector!</string>
     <string name="no_barcode_in_image">No barcode was detected in that image.</string>
     <string name="multiple_barcodes_in_image">Too many barcodes.  Scan just one at a time.</string>
+    <string name="nav_drawer_exhibits_subtitle">Exhibits</string>
+    <string name="nav_exhibit1_name">Ripple of Hope</string>
+    <string name="nav_exhibit2_name">Centennial</string>
+    <string name="nav_scan_barcode">Scan QR code</string>
+    <string name="nav_check_location">Check location</string>
+    <string name="json_filename">exhibits.json</string>
 </resources>

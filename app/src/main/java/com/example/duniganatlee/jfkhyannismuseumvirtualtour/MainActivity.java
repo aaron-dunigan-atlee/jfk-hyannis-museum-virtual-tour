@@ -1,11 +1,19 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -18,6 +26,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.ImageUtils;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.vision.barcode.Barcode;
 
 import java.io.File;
@@ -30,10 +43,17 @@ public class MainActivity extends AppCompatActivity
 
     // Request code for launching camera app
     private int REQUEST_CAMERA_IMAGE = 1;
+    // Max distance (meters) from JFK museum to be considered "at museum."
+    private final float MAX_DISTANCE_TO_MUSEUM = (float) 100.0;
 
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.duniganatlee.fileprovider";
     // Path for a temporary photo taken when user scans a barcode.
     private String mTempPhotoPath;
+    private FusedLocationProviderClient mFusedLocationClient;
+    // Constants for checking permissions.
+    private final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
+    // Whether the user is currently at the JFK Hyannis museum
+    private boolean mAtMuseum = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +84,9 @@ public class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.media_player_container, fragment)
                 .commit();
+
+        // Get location services client.
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
     @Override
@@ -105,9 +128,9 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
+            getImageFromCamera();
+        } else if (id == R.id.nav_location) {
+            checkLocation(this);
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -189,6 +212,48 @@ public class MainActivity extends AppCompatActivity
             } else {
                 Toast.makeText(this, getString(R.string.multiple_barcodes_in_image), Toast.LENGTH_LONG).show();
             }
+        }
+    }
+
+    // Check whether we are at the museum.
+    // Location checking based on https://developer.android.com/training/location/retrieve-current
+    private void checkLocation(final Context context) {
+        final String LOCATION_TAG = "Location";
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_FINE_LOCATION);
+        } else {
+            mFusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location currentLocation) {
+                            // Got last known location. In some rare situations this can be null.
+                            if (currentLocation == null) {
+                                // Logic to handle location object
+                                Log.d(LOCATION_TAG,"Null location.");
+                            } else {
+                                Log.d(LOCATION_TAG, currentLocation.toString());
+                                Log.d("Location provider",currentLocation.getProvider());
+                                float museumLatitude = Float.parseFloat(getString(R.string.jfk_museum_latitude));
+                                float museumLongitude = Float.parseFloat(getString(R.string.jfk_museum_longitude));
+                                Location museumLocation = new Location(currentLocation);
+                                museumLocation.setLatitude(museumLatitude);
+                                museumLocation.setLongitude(museumLongitude);
+                                float distanceToMuseum = currentLocation.distanceTo(museumLocation);
+                                Log.d("Distance to museum",Float.toString(distanceToMuseum));
+                                mAtMuseum = (distanceToMuseum < MAX_DISTANCE_TO_MUSEUM);
+                            }
+                        }
+                    })
+                    .addOnFailureListener(this, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d("Location",e.toString());
+                        }
+                    });
         }
     }
 }

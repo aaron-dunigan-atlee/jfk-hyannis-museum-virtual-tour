@@ -7,32 +7,25 @@
         <item
             android:id="@+id/nav_camera"
             android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
+            android:title="@string/nav_scan_barcode" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/nav_location"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
-    </group>
+            android:title="@string/nav_check_location" />
 
-    <item android:title="Communicate">
+    </group>
+    <item android:title="@string/nav_drawer_exhibits_subtitle">
         <menu>
             <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:id="@+id/nav_exhibit1"
+                android:icon="@drawable/ic_menu_gallery"
+                android:title="@string/nav_exhibit1_name" />
             <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:id="@+id/nav_exhibit2"
+                android:icon="@drawable/ic_menu_gallery"
+                android:title="@string/nav_exhibit2_name" />
         </menu>
     </item>
+
 
 </menu>
