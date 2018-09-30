@@ -51,7 +51,7 @@ public class MediaPlayerFragment extends Fragment {
     private String mMediaUrl;
     private long exoPlayerPlaybackPosition = 0;
     private int exoPlayerWindowIndex = 0;
-    private boolean exoPlayerAutoPlay = true;
+    private boolean exoPlayerAutoPlay = false;
     private static final String PLAYBACK_POSITION = "playback_position";
     private static final String WINDOW_INDEX = "window_index";
     private static final String AUTOPLAY = "autoplay";

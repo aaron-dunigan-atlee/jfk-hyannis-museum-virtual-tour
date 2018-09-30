@@ -14,16 +14,10 @@
             android:title="@string/nav_check_location" />
 
     </group>
-    <item android:title="@string/nav_drawer_exhibits_subtitle">
+    <item android:title="@string/nav_drawer_exhibits_subtitle"
+        android:id="@+id/nav_exhibits_section">
         <menu>
-            <item
-                android:id="@+id/nav_exhibit1"
-                android:icon="@drawable/ic_menu_gallery"
-                android:title="@string/nav_exhibit1_name" />
-            <item
-                android:id="@+id/nav_exhibit2"
-                android:icon="@drawable/ic_menu_gallery"
-                android:title="@string/nav_exhibit2_name" />
+            <!-- Items will be added at runtime -->
         </menu>
     </item>
 

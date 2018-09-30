@@ -24,7 +24,7 @@ public class ImageUtils {
     // Create a temporary image file in the app's cache directory, in order to store camera images
     // for barcode processing.
     // See https://developer.android.com/training/camera/photobasics
-    static File createTemporaryImageFile(Context context) throws IOException {
+    public static File createTemporaryImageFile(Context context) throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -36,7 +36,7 @@ public class ImageUtils {
         );
     }
 
-    static boolean deleteTemporaryImageFile(Context context, String filePath) {
+    public static boolean deleteTemporaryImageFile(Context context, String filePath) {
         // Get the file.
         File fileToDelete = new File(filePath);
 
@@ -50,7 +50,7 @@ public class ImageUtils {
         return deleted;
     }
 
-    static SparseArray<Barcode> detectBarcodes(Context context, String filePath) {
+    public static SparseArray<Barcode> detectBarcodes(Context context, String filePath) {
         // Setup barcode detector
         BarcodeDetector detector =
                 new BarcodeDetector.Builder(context.getApplicationContext())

@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -26,7 +27,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.AppDatabase;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.Exhibit;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.ImageUtils;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.JsonUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -42,11 +46,11 @@ public class MainActivity extends AppCompatActivity
                     MediaPlayerFragment.OnFragmentInteractionListener {
 
     // Request code for launching camera app
-    private int REQUEST_CAMERA_IMAGE = 1;
+    private static final int REQUEST_CAMERA_IMAGE = 1;
     // Max distance (meters) from JFK museum to be considered "at museum."
-    private final float MAX_DISTANCE_TO_MUSEUM = (float) 100.0;
-
+    private static final float MAX_DISTANCE_TO_MUSEUM = (float) 100.0;
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.duniganatlee.fileprovider";
+    private static final String PIECE_ID = "piece_id";
     // Path for a temporary photo taken when user scans a barcode.
     private String mTempPhotoPath;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -54,6 +58,11 @@ public class MainActivity extends AppCompatActivity
     private final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
     // Whether the user is currently at the JFK Hyannis museum
     private boolean mAtMuseum = false;
+
+    private String mExhibitsJson = null;
+    private Exhibit[] mExhibitsList;
+    private AppDatabase mHistoryDb;
+    private int mPieceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +79,22 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        // TODO: Handle error loading JSON.
+        mExhibitsJson = JsonUtils.loadJSONFromAsset(this);
+        mExhibitsList = JsonUtils.parseExhibitList(mExhibitsJson);
+
+
+        // Get instance of viewing history database.
+        mHistoryDb = AppDatabase.getInstance(getApplicationContext());
+
+        // Find out which exhibit piece we're looking at.  If not specified, view the intro video.
+        if (savedInstanceState != null) {
+            mPieceId = savedInstanceState.getInt(PIECE_ID);
+        } else {
+            mPieceId = 0;
+        }
+        setUpViewModel();
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -78,6 +103,15 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        // Add exhibit titles to navigation drawer menu.
+        // https://freakycoder.com/android-notes-53-how-to-create-menu-item-for-navigationdrawer-programmatically-67ddfa8027bc
+        // Note that Menu.findItem(id) finds by *resource* id, whereas Menu.getItem(index) gets by position.
+        // https://developer.android.com/reference/android/view/Menu#findItem(int)
+        SubMenu exhibitsMenu = navigationView.getMenu().findItem(R.id.nav_exhibits_section).getSubMenu();
+        for (int i=0; i<mExhibitsList.length; i++) {
+            exhibitsMenu.add(mExhibitsList[i].getExhibitTitle())
+                .setIcon(R.drawable.ic_menu_gallery);
+        }
 
         // Add media player fragment to its container.
         MediaPlayerFragment fragment = new MediaPlayerFragment();
@@ -87,6 +121,8 @@ public class MainActivity extends AppCompatActivity
 
         // Get location services client.
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+
     }
 
     @Override
@@ -131,16 +167,7 @@ public class MainActivity extends AppCompatActivity
             getImageFromCamera();
         } else if (id == R.id.nav_location) {
             checkLocation(this);
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -255,5 +282,16 @@ public class MainActivity extends AppCompatActivity
                         }
                     });
         }
+    }
+
+    // Set up ViewModel
+    private void setUpViewModel() {
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(PIECE_ID, mPieceId);
     }
 }

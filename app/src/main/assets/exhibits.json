@@ -1,6 +1,8 @@
-{"exhibit_title":"RFK: Ripple of Hope",
+[{"exhibit_title":"RFK: Ripple of Hope",
+  "id":2,
 "exhibit_pieces":[
-  {"title":"Robert Kennedy Speaks",
+  {"id":2000,
+    "title":"Robert Kennedy Speaks",
     "description":"Here is a description of the first exhibit piece.  Notice that in the photograph, ...",
     "narrationURL":"http://techslides.com/demos/samples/sample.mp3",
     "resources":[{
@@ -10,12 +12,13 @@
       "resource_type":"audio"
      },
       {"title":"Tribute to JFK at 1964 DNC",
-        "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfk1964dnc.mp3"
+        "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfk1964dnc.mp3",
         "background_image_URL":"https://www.americanrhetoric.com/images/rfk1964.JPG",
         "resource_type":"audio"
       }]
   },
-  {"title":"Exhibit Piece 2",
+  {"id":2001,
+    "title":"Exhibit Piece 2",
     "description":"And now we move on to exhibit piece 2 which will show how Robert Kennedy ...",
     "narrationURL":"https://sampleswap.org/samples-ghost/VOCALS%20and%20SPOKEN%20WORD/NASA%20Space%20Shuttle%20Communications/753[kb]NASA-ready-for-the-maneuver-copy.wav.mp3",
     "resources":[{
@@ -24,4 +27,35 @@
       "resource_type":"video"
     }]
   }
-]}
+]},
+  {"id":1,
+    "exhibit_title":"Centennial Exhibit",
+    "exhibit_pieces":[
+      {"id":1000,
+        "title":"Robert Kennedy Speaks",
+        "description":"Here is a description of the first exhibit piece.  Notice that in the photograph, ...",
+        "narrationURL":"http://techslides.com/demos/samples/sample.mp3",
+        "resources":[{
+          "title":"Remarks on the Death of Martin Luther King",
+          "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfkonmlkdeath45454.mp3",
+          "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
+          "resource_type":"audio"
+        },
+          {"title":"Tribute to JFK at 1964 DNC",
+            "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfk1964dnc.mp3",
+            "background_image_URL":"https://www.americanrhetoric.com/images/rfk1964.JPG",
+            "resource_type":"audio"
+          }]
+      },
+      {"id":1001,
+        "title":"Exhibit Piece 2",
+        "description":"And now we move on to exhibit piece 2 which will show how Robert Kennedy ...",
+        "narrationURL":"https://sampleswap.org/samples-ghost/VOCALS%20and%20SPOKEN%20WORD/NASA%20Space%20Shuttle%20Communications/753[kb]NASA-ready-for-the-maneuver-copy.wav.mp3",
+        "resources":[{
+          "title":"Video about RFK Asassination",
+          "resource_URL":"https://archive.org/download/RfkAssassination/RfkAssassination1.mp4",
+          "resource_type":"video"
+        }]
+      }
+    ]}
+  ]
