@@ -36,5 +36,23 @@ public class Exhibit {
     public void setExhibitPieces(List<ExhibitPiece> exhibitPieces) {
         this.exhibitPieces = exhibitPieces;
     }
+    
+    public static Exhibit getExhibitById(Exhibit[] exhibitList, int id) {
+        for (Exhibit exhibit : exhibitList) {
+            if (exhibit.getId() == id) {
+                return exhibit;
+            }
+        }
+        return null;
+    }
+
+    public ExhibitPiece getPieceById(int id) {
+        for (ExhibitPiece piece : exhibitPieces) {
+            if (piece.getId() == id) {
+                return piece;
+            }
+        }
+        return null;
+    }
 
 }

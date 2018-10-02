@@ -18,6 +18,9 @@ public class ExhibitResource {
     @SerializedName("resource_type")
     @Expose
     private String resourceType;
+    @SerializedName("text")
+    @Expose
+    private String text;
 
     public String getTitle() {
         return title;
@@ -51,4 +54,11 @@ public class ExhibitResource {
         this.resourceType = resourceType;
     }
 
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
 }

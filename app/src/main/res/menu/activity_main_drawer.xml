@@ -17,6 +17,10 @@
     <item android:title="@string/nav_drawer_exhibits_subtitle"
         android:id="@+id/nav_exhibits_section">
         <menu>
+            <item
+                android:id="@+id/nav_intro"
+                android:icon="@drawable/ic_menu_slideshow"
+                android:title="@string/nav_intro_title"/>
             <!-- Items will be added at runtime -->
         </menu>
     </item>

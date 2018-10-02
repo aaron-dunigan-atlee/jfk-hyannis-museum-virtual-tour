@@ -15,12 +15,6 @@ public class ExhibitPiece {
     @SerializedName("title")
     @Expose
     private String title;
-    @SerializedName("description")
-    @Expose
-    private String description;
-    @SerializedName("narrationURL")
-    @Expose
-    private String narrationURL;
 
     @SerializedName("resources")
     @Expose
@@ -32,22 +26,6 @@ public class ExhibitPiece {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getNarrationURL() {
-        return narrationURL;
-    }
-
-    public void setNarrationURL(String narrationURL) {
-        this.narrationURL = narrationURL;
     }
 
     public List<ExhibitResource> getResources() {
@@ -66,4 +44,7 @@ public class ExhibitPiece {
         this.id = id;
     }
 
+    public String getDescription() {
+        return resources.get(0).getText();
+    }
 }

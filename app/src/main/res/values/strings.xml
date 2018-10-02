@@ -24,4 +24,6 @@
     <string name="nav_scan_barcode">Scan QR code</string>
     <string name="nav_check_location">Check location</string>
     <string name="json_filename">exhibits.json</string>
+    <string name="nav_intro_title">Welcome to JFK Hyannis Museum</string>
+    <string name="invalid_barcode">Couldn\'t read that barcode.  Please scan again.</string>
 </resources>

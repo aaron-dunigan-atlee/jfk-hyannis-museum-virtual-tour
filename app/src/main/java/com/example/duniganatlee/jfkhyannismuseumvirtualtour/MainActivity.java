@@ -25,10 +25,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.AppDatabase;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.HistoryEntry;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.Exhibit;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitPiece;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitResource;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.ImageUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.JsonUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -39,6 +43,9 @@ import com.google.android.gms.vision.barcode.Barcode;
 
 import java.io.File;
 import java.io.IOException;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 
 public class MainActivity extends AppCompatActivity
@@ -51,11 +58,12 @@ public class MainActivity extends AppCompatActivity
     private static final float MAX_DISTANCE_TO_MUSEUM = (float) 100.0;
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.duniganatlee.fileprovider";
     private static final String PIECE_ID = "piece_id";
+    private static final int WELCOME_ID = 0;
     // Path for a temporary photo taken when user scans a barcode.
     private String mTempPhotoPath;
     private FusedLocationProviderClient mFusedLocationClient;
     // Constants for checking permissions.
-    private final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
+    private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
     // Whether the user is currently at the JFK Hyannis museum
     private boolean mAtMuseum = false;
 
@@ -63,15 +71,25 @@ public class MainActivity extends AppCompatActivity
     private Exhibit[] mExhibitsList;
     private AppDatabase mHistoryDb;
     private int mPieceId;
+    private HistoryEntry historyEntryForCurrentPiece;
+    private ExhibitPiece mPiece;
+    private String mResourceURL;
+
+    // Views for ButterKnife binding.
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.fab) FloatingActionButton fab;
+    @BindView(R.id.drawer_layout) DrawerLayout drawer;
+    @BindView(R.id.nav_view) NavigationView navigationView;
+    @BindView(R.id.piece_description_text_view) TextView pieceDescriptionTextView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -83,51 +101,46 @@ public class MainActivity extends AppCompatActivity
         mExhibitsJson = JsonUtils.loadJSONFromAsset(this);
         mExhibitsList = JsonUtils.parseExhibitList(mExhibitsJson);
 
-
         // Get instance of viewing history database.
         mHistoryDb = AppDatabase.getInstance(getApplicationContext());
 
         // Find out which exhibit piece we're looking at.  If not specified, view the intro video.
         if (savedInstanceState != null) {
+            Log.d(PIECE_ID, "Getting ID from savedInstanceState");
             mPieceId = savedInstanceState.getInt(PIECE_ID);
         } else {
-            mPieceId = 0;
+            mPieceId = WELCOME_ID;
         }
-        setUpViewModel();
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        // Populate views
+        loadNewPiece(mPieceId);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         // Add exhibit titles to navigation drawer menu.
         // https://freakycoder.com/android-notes-53-how-to-create-menu-item-for-navigationdrawer-programmatically-67ddfa8027bc
         // Note that Menu.findItem(id) finds by *resource* id, whereas Menu.getItem(index) gets by position.
         // https://developer.android.com/reference/android/view/Menu#findItem(int)
         SubMenu exhibitsMenu = navigationView.getMenu().findItem(R.id.nav_exhibits_section).getSubMenu();
-        for (int i=0; i<mExhibitsList.length; i++) {
-            exhibitsMenu.add(mExhibitsList[i].getExhibitTitle())
+        for (Exhibit exhibit: mExhibitsList) {
+            exhibitsMenu.add(exhibit.getExhibitTitle())
                 .setIcon(R.drawable.ic_menu_gallery);
         }
 
-        // Add media player fragment to its container.
-        MediaPlayerFragment fragment = new MediaPlayerFragment();
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.media_player_container, fragment)
-                .commit();
-
         // Get location services client.
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Set up ViewModel
+        setUpViewModel();
 
 
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -168,7 +181,6 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_location) {
             checkLocation(this);
         }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -233,13 +245,69 @@ public class MainActivity extends AppCompatActivity
             if (barcodes.size() == 1) {
                 Barcode barcode = barcodes.valueAt(0);
                 String barcodeContent = barcode.rawValue;
-                Toast.makeText(this, barcodeContent, Toast.LENGTH_LONG).show();
+                Log.d("Barcode found", barcodeContent);
+                processBarcode(barcode);
             } else if (barcodes.size() == 0) {
                 Toast.makeText(this, getString(R.string.no_barcode_in_image), Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, getString(R.string.multiple_barcodes_in_image), Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    private void processBarcode(Barcode barcode) {
+        // Check that the user has scanned a valid barcode for this app.
+        if (barcode.valueFormat != Barcode.TEXT) {
+            Toast.makeText(this, getString(R.string.invalid_barcode), Toast.LENGTH_LONG).show();
+        } else /* We have a text barcode */ {
+            String barcodeText = barcode.displayValue;
+            if (!barcodeText.startsWith("JFK Hyannis Museum")) {
+                Toast.makeText(this, getString(R.string.invalid_barcode), Toast.LENGTH_LONG).show();
+            } else /* We have a barcode for this app. */ {
+                String splitBarcodeText[] = barcodeText.split("\n");
+                try {
+                    // TODO: Remove exhibit ID from barcode format?
+                    int barcodeExhibitId = Integer.parseInt(splitBarcodeText[1]);
+                    int barcodePieceId = Integer.parseInt(splitBarcodeText[2]);
+                    Log.d("Barcode Exhibit",Integer.toString(barcodeExhibitId));
+                    Log.d("Barcode Piece",Integer.toString(barcodePieceId));
+                    loadNewPiece(barcodePieceId);
+                } catch (IndexOutOfBoundsException ex) {
+                    Log.d("Barcode", "Bad barcode read.  Exhibit or piece ID not found.");
+                }
+            }
+        }
+    }
+
+    private void loadNewPiece(int pieceId) {
+        // TODO: Check database to see if we've viewed this one.
+        // TODO: Update history next and previous.
+        // Exhibit ID is encoded in piece ID:
+        int exhibitId = pieceId / 1000;
+        Exhibit exhibit = Exhibit.getExhibitById(mExhibitsList, exhibitId);
+        if (exhibit != null) {
+            ExhibitPiece piece = exhibit.getPieceById(pieceId);
+            if (piece != null) {
+                mPieceId = pieceId;
+                mPiece = piece;
+            }
+        }
+        Log.d(PIECE_ID,Integer.toString(mPieceId));
+
+        // Replace the media player fragment.
+        // By default, load the piece narration and description, which is the first resource.
+        // TODO: Create helper functions to get narration and background.
+        ExhibitResource resource = mPiece.getResources().get(0);
+        MediaPlayerFragment newFragment = MediaPlayerFragment
+                .newInstance(resource.getResourceURL(), resource.getBackgroundImageURL());
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.media_player_container, newFragment)
+                .commit();
+        // TODO: Get list of resources and populate recyclerview.
+        // TODO: Create recyclerview
+
+        // Swap out the description
+        pieceDescriptionTextView.setText(mPiece.getDescription());
     }
 
     // Check whether we are at the museum.
@@ -286,7 +354,6 @@ public class MainActivity extends AppCompatActivity
 
     // Set up ViewModel
     private void setUpViewModel() {
-
     }
 
     @Override

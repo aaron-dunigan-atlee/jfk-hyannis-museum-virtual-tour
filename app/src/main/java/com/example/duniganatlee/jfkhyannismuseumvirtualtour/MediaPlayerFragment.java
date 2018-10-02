@@ -1,9 +1,13 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,13 +18,11 @@ import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
@@ -37,14 +39,13 @@ import butterknife.ButterKnife;
  * create an instance of this fragment.
  */
 public class MediaPlayerFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final String MEDIA_URL = "media_url";
+    private static final String BACKGROUND_URL = "background_url";
+    public static final String NO_MEDIA = "no_media";
+    public static final String DEFAULT_BACKGROUND = "default_background";
+
+    private String mBackgroundUrl;
 
     private OnFragmentInteractionListener mListener;
     private SimpleExoPlayer mExoPlayer;
@@ -67,16 +68,16 @@ public class MediaPlayerFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param mediaUrl URL of media to be played.
+     * @param backgroundURL URL of background image to display.
      * @return A new instance of fragment MediaPlayerFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MediaPlayerFragment newInstance(String param1, String param2) {
+    public static MediaPlayerFragment newInstance(String mediaUrl, String backgroundURL) {
         MediaPlayerFragment fragment = new MediaPlayerFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(MEDIA_URL, mediaUrl);
+        args.putString(BACKGROUND_URL, backgroundURL);
         fragment.setArguments(args);
         return fragment;
     }
@@ -85,8 +86,11 @@ public class MediaPlayerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mMediaUrl = getArguments().getString(MEDIA_URL);
+            mBackgroundUrl = getArguments().getString(BACKGROUND_URL);
+        } else {
+            mMediaUrl = NO_MEDIA;
+            mBackgroundUrl = DEFAULT_BACKGROUND;
         }
     }
 
@@ -98,8 +102,6 @@ public class MediaPlayerFragment extends Fragment {
         ButterKnife.bind(this, rootView);
 
         // Get the media to be played, and load previous state of player if applicable.
-        // TODO: Load proper media resource.
-        mMediaUrl = getString(R.string.sample_video_URL);
         if (savedInstanceState != null) {
             exoPlayerAutoPlay = savedInstanceState.getBoolean(AUTOPLAY, false);
             exoPlayerWindowIndex = savedInstanceState.getInt(WINDOW_INDEX, 0);
@@ -152,7 +154,7 @@ public class MediaPlayerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        initializePlayer(Uri.parse(mMediaUrl));
+        initializePlayer(mMediaUrl);
     }
 
     @Override
@@ -162,22 +164,38 @@ public class MediaPlayerFragment extends Fragment {
     }
 
     // Initialize ExoPlayer.  See https://google.github.io/ExoPlayer/guide.html
-    public void initializePlayer(Uri mediaUri) {
+    public void initializePlayer(String mediaUrl) {
         Context context = getContext();
+        Uri mediaUri = Uri.parse(mediaUrl);
         if (mExoPlayer == null) {
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
             RenderersFactory renderersFactory = new DefaultRenderersFactory(context);
             mExoPlayer = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector, loadControl);
+            if (mBackgroundUrl != null) {
+                if (mBackgroundUrl.equals(DEFAULT_BACKGROUND)) {
+                    Log.d("intitalizePlayer","Setting default artwork.");
+                    // TODO: Choose default artwork.
+                    mExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource
+                            (getResources(), R.drawable.jfklogo_bluebg_mobile));
+                } else {
+                    // TODO: Load background URL image and set it.
+                    // might have to build a Picasso Target.  See https://square.github.io/picasso/2.x/picasso/com/squareup/picasso/Target.html
+                    // https://www.codexpedia.com/android/android-download-and-save-image-through-picasso/
+
+                }
+            }
             mExoPlayerView.setPlayer(mExoPlayer);
-            //Prepare media source.  See https://google.github.io/ExoPlayer/guide.html#preparing-the-player
-            String appName = getString(R.string.app_name);
-            String userAgent = Util.getUserAgent(context, appName);
-            MediaSource mediaSource = new ExtractorMediaSource.Factory(
-                    new DefaultDataSourceFactory(context, userAgent)).createMediaSource(mediaUri);
-            mExoPlayer.prepare(mediaSource);
-            mExoPlayer.setPlayWhenReady(exoPlayerAutoPlay);
-            mExoPlayer.seekTo(exoPlayerWindowIndex, exoPlayerPlaybackPosition);
+            if (!mMediaUrl.equals(NO_MEDIA)) {
+                //Prepare media source.  See https://google.github.io/ExoPlayer/guide.html#preparing-the-player
+                String appName = getString(R.string.app_name);
+                String userAgent = Util.getUserAgent(context, appName);
+                MediaSource mediaSource = new ExtractorMediaSource.Factory(
+                        new DefaultDataSourceFactory(context, userAgent)).createMediaSource(mediaUri);
+                mExoPlayer.prepare(mediaSource);
+                mExoPlayer.setPlayWhenReady(exoPlayerAutoPlay);
+                mExoPlayer.seekTo(exoPlayerWindowIndex, exoPlayerPlaybackPosition);
+            }
         }
     }
 

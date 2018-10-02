@@ -1,6 +1,19 @@
-[{"exhibit_title":"RFK: Ripple of Hope",
+[{"exhibit_title":"Welcome",
+  "id":0,
+  "exhibit_pieces":[
+    {"id":0,
+      "title":"Welcome",
+      "resources":[{
+        "title":"Description",
+        "resource_URL":"http://techslides.com/demos/samples/sample.mp3",
+        "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
+        "resource_type":"audio",
+        "text":"Welcome to JFK Hyannis Museum.  Enjoy the tour."
+      }]
+    }]},
+  {"exhibit_title":"RFK: Ripple of Hope",
   "id":2,
-"exhibit_pieces":[
+  "exhibit_pieces":[
   {"id":2000,
     "title":"Robert Kennedy Speaks",
     "description":"Here is a description of the first exhibit piece.  Notice that in the photograph, ...",
