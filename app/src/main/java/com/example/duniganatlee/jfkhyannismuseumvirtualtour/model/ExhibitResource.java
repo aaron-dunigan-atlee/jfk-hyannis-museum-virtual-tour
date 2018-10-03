@@ -15,9 +15,9 @@ public class ExhibitResource {
     @SerializedName("background_image_URL")
     @Expose
     private String backgroundImageURL;
-    @SerializedName("resource_type")
+    @SerializedName("type")
     @Expose
-    private String resourceType;
+    private String type;
     @SerializedName("text")
     @Expose
     private String text;
@@ -46,12 +46,12 @@ public class ExhibitResource {
         this.backgroundImageURL = backgroundImageURL;
     }
 
-    public String getResourceType() {
-        return resourceType;
+    public String getType() {
+        return type;
     }
 
-    public void setResourceType(String resourceType) {
-        this.resourceType = resourceType;
+    public void setType(String resourceType) {
+        this.type = resourceType;
     }
 
     public String getText() {

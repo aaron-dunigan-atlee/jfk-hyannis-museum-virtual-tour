@@ -7,7 +7,7 @@
         "title":"Description",
         "resource_URL":"http://techslides.com/demos/samples/sample.mp3",
         "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
-        "resource_type":"audio",
+        "type":"audio",
         "text":"Welcome to JFK Hyannis Museum.  Enjoy the tour."
       }]
     }]},
@@ -16,18 +16,21 @@
   "exhibit_pieces":[
   {"id":2000,
     "title":"Robert Kennedy Speaks",
-    "description":"Here is a description of the first exhibit piece.  Notice that in the photograph, ...",
-    "narrationURL":"http://techslides.com/demos/samples/sample.mp3",
     "resources":[{
-      "title":"Remarks on the Death of Martin Luther King",
+      "title":"Description",
+      "resource_URL":"http://techslides.com/demos/samples/sample.mp3",
+      "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
+      "type":"audio"
+    },
+      {"title":"Remarks on the Death of Martin Luther King",
       "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfkonmlkdeath45454.mp3",
       "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
-      "resource_type":"audio"
+      "type":"audio"
      },
       {"title":"Tribute to JFK at 1964 DNC",
         "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfk1964dnc.mp3",
         "background_image_URL":"https://www.americanrhetoric.com/images/rfk1964.JPG",
-        "resource_type":"audio"
+        "type":"audio"
       }]
   },
   {"id":2001,
@@ -37,7 +40,7 @@
     "resources":[{
       "title":"Video about RFK Asassination",
       "resource_URL":"https://archive.org/download/RfkAssassination/RfkAssassination1.mp4",
-      "resource_type":"video"
+      "type":"video"
     }]
   }
 ]},
@@ -52,12 +55,12 @@
           "title":"Remarks on the Death of Martin Luther King",
           "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfkonmlkdeath45454.mp3",
           "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
-          "resource_type":"audio"
+          "type":"audio"
         },
           {"title":"Tribute to JFK at 1964 DNC",
             "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfk1964dnc.mp3",
             "background_image_URL":"https://www.americanrhetoric.com/images/rfk1964.JPG",
-            "resource_type":"audio"
+            "type":"audio"
           }]
       },
       {"id":1001,
@@ -67,7 +70,7 @@
         "resources":[{
           "title":"Video about RFK Asassination",
           "resource_URL":"https://archive.org/download/RfkAssassination/RfkAssassination1.mp4",
-          "resource_type":"video"
+          "type":"video"
         }]
       }
     ]}

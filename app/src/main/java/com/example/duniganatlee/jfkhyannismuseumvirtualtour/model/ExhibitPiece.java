@@ -47,4 +47,12 @@ public class ExhibitPiece {
     public String getDescription() {
         return resources.get(0).getText();
     }
+
+    public String[] getResourceTitles() {
+        String titles[] = new String[resources.size()];
+        for (int i=0; i<resources.size(); i++) {
+            titles[i] = resources.get(i).getTitle();
+        }
+        return titles;
+    }
 }

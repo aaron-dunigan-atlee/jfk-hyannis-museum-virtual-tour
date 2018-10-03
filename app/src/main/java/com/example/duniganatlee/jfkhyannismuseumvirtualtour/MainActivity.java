@@ -50,7 +50,8 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-                    MediaPlayerFragment.OnFragmentInteractionListener {
+                    MediaPlayerFragment.OnFragmentInteractionListener,
+                    ResourceListFragment.OnListFragmentInteractionListener {
 
     // Request code for launching camera app
     private static final int REQUEST_CAMERA_IMAGE = 1;
@@ -294,17 +295,17 @@ public class MainActivity extends AppCompatActivity
         }
         Log.d(PIECE_ID,Integer.toString(mPieceId));
 
-        // Replace the media player fragment.
+        // Replace the media player fragment and the resource list fragment.
         // By default, load the piece narration and description, which is the first resource.
-        // TODO: Create helper functions to get narration and background.
+        // TODO: Create helper functions in ExhibitPiece to get narration and background.
         ExhibitResource resource = mPiece.getResources().get(0);
-        MediaPlayerFragment newFragment = MediaPlayerFragment
+        MediaPlayerFragment mediaPlayerFragment = MediaPlayerFragment
                 .newInstance(resource.getResourceURL(), resource.getBackgroundImageURL());
+        ResourceListFragment resourceListFragment = ResourceListFragment.newInstance(mPiece);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.media_player_container, newFragment)
+                .replace(R.id.media_player_container, mediaPlayerFragment)
+                .replace(R.id.resource_list_container,resourceListFragment)
                 .commit();
-        // TODO: Get list of resources and populate recyclerview.
-        // TODO: Create recyclerview
 
         // Swap out the description
         pieceDescriptionTextView.setText(mPiece.getDescription());
@@ -360,5 +361,15 @@ public class MainActivity extends AppCompatActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(PIECE_ID, mPieceId);
+    }
+
+    @Override
+    public void onListFragmentInteraction(ExhibitResource resource) {
+        // Change the media player to the resource that was clicked.
+        MediaPlayerFragment mediaPlayerFragment = MediaPlayerFragment
+                .newInstance(resource.getResourceURL(), resource.getBackgroundImageURL());
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.media_player_container, mediaPlayerFragment)
+                .commit();
     }
 }
