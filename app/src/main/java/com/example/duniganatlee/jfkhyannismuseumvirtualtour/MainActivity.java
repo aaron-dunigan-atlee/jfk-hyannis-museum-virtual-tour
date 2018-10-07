@@ -56,7 +56,10 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-
+/* Database branch.  Initial work on this branch ended 10/7/18.
+   This branch attempts to track each exhibit's history separately.
+   Abandoned in favor of tracking overall viewing history as one single stack.
+ */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
                     MediaPlayerFragment.OnFragmentInteractionListener,
