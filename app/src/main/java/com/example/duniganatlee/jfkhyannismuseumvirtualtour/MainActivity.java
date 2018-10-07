@@ -33,7 +33,6 @@ import android.widget.Toast;
 
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.AppDatabase;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.ExhibitHistoryViewModel;
-import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.ExhibitHistoryViewModelFactory;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.HistoryEntry;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.Exhibit;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitPiece;
@@ -81,11 +80,12 @@ public class MainActivity extends AppCompatActivity
     private Exhibit[] mExhibitsList;
     private AppDatabase mHistoryDb;
     private int mPieceId;
+    // TODO: we probably no longer need mExhibitId.  Remove instances.
     private int mExhibitId;
     private int mNextId = HistoryEntry.NONE;
     private int mPreviousId = HistoryEntry.NONE;
     private HistoryEntry historyEntryForCurrentPiece;
-    private List<HistoryEntry> mHistoryForCurrentExhibit = new ArrayList<>();
+    private List<HistoryEntry> mHistory = new ArrayList<>();
     private ExhibitPiece mPiece;
     private String mResourceURL;
 
@@ -314,26 +314,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        // TODO: Check database to see if we've viewed this one.
-        // Update history next and previous.
-        int finalEntryId;
-        final HistoryEntry finalEntry = HistoryUtils.getFinalEntry(mHistoryForCurrentExhibit);
-        if (finalEntry != null) {
-            finalEntry.setNextPiece(newPieceId);
-            finalEntryId = finalEntry.getPieceId();
-        } else {
-            finalEntryId = HistoryEntry.NONE;
-        }
-        final HistoryEntry newEntry = new HistoryEntry(mPieceId, mExhibitId, finalEntryId, HistoryEntry.NONE);
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                mHistoryDb.historyDao().updateOrAddToHistory(newEntry);
-                if (finalEntry != null) {
-                    mHistoryDb.historyDao().updateOrAddToHistory(finalEntry);
-                }
-            }
-        });
+        updateDatabase(newPieceId);
 
 
         // Replace the media player fragment and the resource list fragment.
@@ -350,6 +331,74 @@ public class MainActivity extends AppCompatActivity
 
         // Swap out the description
         pieceDescriptionTextView.setText(mPiece.getDescription());
+    }
+
+    private void updateDatabase(int newPieceId) {
+        // TODO: Check database to see if we've viewed this one.
+        // Update history next and previous.
+        int finalEntryId;
+        // Get the entry that is currently last on the stack
+        final HistoryEntry finalEntry = HistoryUtils.getFinalEntry(mHistory);
+        // if finalEntry is null, this is the first piece visited, so no need to update previous entry.
+        if (finalEntry != null) {
+            finalEntry.setNextPiece(newPieceId);
+            finalEntryId = finalEntry.getPieceId();
+            // Check if the new piece is the same as the final one on the stack; if so, no need to update db.
+            if (finalEntryId == newPieceId) {return;}
+        } else {
+            finalEntryId = HistoryEntry.NONE;
+        }
+        HistoryEntry previousInstance = HistoryUtils.getEntryById(mHistory, newPieceId);
+        // If previousInstance is not null, user has viewed this entry before.  Therefore we need to link
+        // this entry's previous to its next.
+        if (previousInstance != null) {
+            final HistoryEntry previousEntry = HistoryUtils.getEntryById(mHistory, previousInstance.getPreviousPiece());
+            final HistoryEntry nextEntry = HistoryUtils.getEntryById(mHistory, previousInstance.getNextPiece());
+            if (previousEntry != null) {
+                if (nextEntry != null) {
+                    previousEntry.setNextPiece(nextEntry.getPieceId());
+                    nextEntry.setPreviousPiece(previousEntry.getPieceId());
+                } else {
+                    // nextEntry is null, so set previousEntry's nextPiece to NONE
+                    // This *should* only happen when new piece is same as final piece,
+                    // in which case we already returned above; but we'll check just in case.
+                    previousEntry.setNextPiece(HistoryEntry.NONE);
+                }
+            } else {
+                // previousEntry is null, so if necessary set nextEntry's previousPiece to NONE.
+                // This happens if the piece was previously first on the stack.
+                if (nextEntry != null) {
+                    nextEntry.setPreviousPiece(HistoryEntry.NONE);
+                }
+            }
+            // Update previousEntry and nextEntry, if applicable, in the database.
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    // As we're using a ViewModel observer, these database updates will
+                    // be automatically added to the mHistory field.
+                    if (previousEntry != null) {
+                        mHistoryDb.historyDao().updateHistory(previousEntry);
+                    }
+                    if (nextEntry != null) {
+                        mHistoryDb.historyDao().updateHistory(nextEntry);
+                    }
+                }
+            });
+        }
+        // Now create the new entry and update the previous final entry if necessary.
+        final HistoryEntry newEntry = new HistoryEntry(mPieceId, mExhibitId, finalEntryId, HistoryEntry.NONE);
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                // As we're using a ViewModel observer, these database updates will
+                // be automatically added to the mHistory field.
+                mHistoryDb.historyDao().updateOrAddToHistory(newEntry);
+                if (finalEntry != null) {
+                    mHistoryDb.historyDao().updateHistory(finalEntry);
+                }
+            }
+        });
     }
 
     // Check whether we are at the museum.
@@ -395,15 +444,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     // Set up ViewModel.  This should observe the database for items in the current exhibit.
-    // If the database is changed, mHistoryForCurrentExhibit will be updated to reflect the change.
+    // If the database is changed, mHistory will be updated to reflect the change.
     // TODO: set up the view model again if the user changes to a different exhibit?
     private void setUpViewModel() {
-        ExhibitHistoryViewModelFactory factory = new ExhibitHistoryViewModelFactory(mHistoryDb, mExhibitId);
-        final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this, factory).get(ExhibitHistoryViewModel.class);
-        viewModel.getExhibitHistory().observe(this, new Observer<List<HistoryEntry>>() {
+        final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this).get(ExhibitHistoryViewModel.class);
+        viewModel.getHistory().observe(this, new Observer<List<HistoryEntry>>() {
             @Override
             public void onChanged(@Nullable List<HistoryEntry> historyEntries) {
-                mHistoryForCurrentExhibit = historyEntries;
+                mHistory = historyEntries;
             }
         });
     }

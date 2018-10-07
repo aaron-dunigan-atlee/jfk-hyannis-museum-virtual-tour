@@ -13,8 +13,8 @@ import java.util.List;
 @Dao
 public interface HistoryDao {
 
-    @Query("SELECT * FROM history WHERE exhibitId = :exhibitId")
-    LiveData<List<HistoryEntry>> loadExhibitHistory(int exhibitId);
+    @Query("SELECT * FROM history")
+    LiveData<List<HistoryEntry>> loadHistory();
 
     @Delete
     void removeFromHistory(HistoryEntry historyEntry);
@@ -24,6 +24,9 @@ public interface HistoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void updateOrAddToHistory(HistoryEntry historyEntry);
 
+    @Insert
+    void addToHistory(HistoryEntry historyEntry);
+
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateHistory(HistoryEntry historyEntry);
 
@@ -31,7 +34,7 @@ public interface HistoryDao {
     LiveData<HistoryEntry> loadPieceHistory(int pieceId);
 
     // TODO: Is there a way to replace -1 with a reference to HistoryEntry.NONE?
-    @Query("SELECT * FROM history WHERE nextPiece = -1 AND exhibitId = :exhibitId")
-    LiveData<HistoryEntry> getLastOnStackForExhibit(int exhibitId);
+    @Query("SELECT * FROM history WHERE nextPiece = -1")
+    LiveData<HistoryEntry> getLastOnStack();
 
 }

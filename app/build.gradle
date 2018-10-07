@@ -44,6 +44,4 @@ dependencies {
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     implementation 'com.google.code.gson:gson:2.8.5'
-    // Database debugger: https://github.com/amitshekhariitbhu/Android-Debug-Database
-    debugImplementation 'com.amitshekhar.android:debug-db:1.0.4'
 }

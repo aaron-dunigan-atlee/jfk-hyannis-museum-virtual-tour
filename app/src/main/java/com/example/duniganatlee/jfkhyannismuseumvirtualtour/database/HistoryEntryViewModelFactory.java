@@ -13,6 +13,6 @@ public class HistoryEntryViewModelFactory extends ViewModelProvider.NewInstanceF
     @Override
     public <T extends ViewModel> T create(Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new ExhibitHistoryViewModel(mHistoryDb, mPieceId);
+        return (T) new HistoryEntryViewModel(mHistoryDb, mPieceId);
     }
 }
