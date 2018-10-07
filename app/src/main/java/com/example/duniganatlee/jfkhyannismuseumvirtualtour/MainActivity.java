@@ -293,9 +293,30 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadNewPiece(int newPieceId) {
+        // Exhibit ID is encoded in piece ID:
+        int exhibitId = getExhibitId(newPieceId);
+        Exhibit exhibit = Exhibit.getExhibitById(mExhibitsList, exhibitId);
+        if (exhibit == null) {
+            // TODO: Handle this error case.
+            Log.e(PIECE_ID, "exhibitId did not correspond to any known Exhibit");
+            return;
+        } else {
+            ExhibitPiece piece = exhibit.getPieceById(newPieceId);
+            if (piece == null) {
+                // TODO: Handle this error case.
+                Log.e(PIECE_ID, "pieceId did not correspond to any known ExhibitPiece");
+                return;
+            } else {
+                mPieceId = newPieceId;
+                mPiece = piece;
+                mExhibitId = exhibitId;
+                Log.d(PIECE_ID,Integer.toString(mPieceId));
+            }
+        }
+
         // TODO: Check database to see if we've viewed this one.
         // Update history next and previous.
-        /*int finalEntryId;
+        int finalEntryId;
         final HistoryEntry finalEntry = HistoryUtils.getFinalEntry(mHistoryForCurrentExhibit);
         if (finalEntry != null) {
             finalEntry.setNextPiece(newPieceId);
@@ -307,27 +328,12 @@ public class MainActivity extends AppCompatActivity
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                mHistoryDb.historyDao().updateHistory(newEntry);
+                mHistoryDb.historyDao().updateOrAddToHistory(newEntry);
                 if (finalEntry != null) {
-                    mHistoryDb.historyDao().updateHistory(finalEntry);
+                    mHistoryDb.historyDao().updateOrAddToHistory(finalEntry);
                 }
             }
-        });*/
-        // Exhibit ID is encoded in piece ID:
-        int exhibitId = newPieceId / 1000;
-        Exhibit exhibit = Exhibit.getExhibitById(mExhibitsList, exhibitId);
-        if (exhibit != null) {
-            ExhibitPiece piece = exhibit.getPieceById(newPieceId);
-            if (piece != null) {
-                mPieceId = newPieceId;
-                mPiece = piece;
-                mExhibitId = exhibitId;
-                Log.d(PIECE_ID,Integer.toString(mPieceId));
-                return;
-            }
-        }
-        // TODO: Handle this error case.
-        Log.e(PIECE_ID, "pieceId did not correspond to any known ExhibitPiece");
+        });
 
 
         // Replace the media player fragment and the resource list fragment.
@@ -390,16 +396,16 @@ public class MainActivity extends AppCompatActivity
 
     // Set up ViewModel.  This should observe the database for items in the current exhibit.
     // If the database is changed, mHistoryForCurrentExhibit will be updated to reflect the change.
-    // TODO: set up the view model again if the user changes to a different exhibit
+    // TODO: set up the view model again if the user changes to a different exhibit?
     private void setUpViewModel() {
-        /*ExhibitHistoryViewModelFactory factory = new ExhibitHistoryViewModelFactory(mHistoryDb, mExhibitId);
+        ExhibitHistoryViewModelFactory factory = new ExhibitHistoryViewModelFactory(mHistoryDb, mExhibitId);
         final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this, factory).get(ExhibitHistoryViewModel.class);
         viewModel.getExhibitHistory().observe(this, new Observer<List<HistoryEntry>>() {
             @Override
             public void onChanged(@Nullable List<HistoryEntry> historyEntries) {
                 mHistoryForCurrentExhibit = historyEntries;
             }
-        });*/
+        });
     }
 
     @Override
@@ -416,5 +422,9 @@ public class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.media_player_container, mediaPlayerFragment)
                 .commit();
+    }
+
+    private int getExhibitId(int pieceId) {
+        return pieceId / 1000;
     }
 }

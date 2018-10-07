@@ -19,8 +19,10 @@ public interface HistoryDao {
     @Delete
     void removeFromHistory(HistoryEntry historyEntry);
 
-    @Insert
-    void addToHistory(HistoryEntry historyEntry);
+    // "INSERT or UPDATE" command.  Updates if the entry exists; else inserts it.
+    // See https://stackoverflow.com/a/45677347/10332984
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void updateOrAddToHistory(HistoryEntry historyEntry);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateHistory(HistoryEntry historyEntry);

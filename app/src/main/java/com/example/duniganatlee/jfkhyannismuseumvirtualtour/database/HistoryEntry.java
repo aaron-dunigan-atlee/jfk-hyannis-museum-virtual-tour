@@ -61,6 +61,7 @@ public class HistoryEntry {
     }
 
     // Put this HistoryEntry (and all subsequent entries) after another entry in the back stack.
+    @Ignore
     public void AddAfter(HistoryEntry previousEntry) {
         previousEntry.setNextPiece(this.pieceId);
         this.setPreviousPiece(previousEntry.getPieceId());
