@@ -59,4 +59,10 @@ public class HistoryEntry {
     public void setPreviousPiece(int previousPiece) {
         this.previousPiece = previousPiece;
     }
+
+    // Put this HistoryEntry (and all subsequent entries) after another entry in the back stack.
+    public void AddAfter(HistoryEntry previousEntry) {
+        previousEntry.setNextPiece(this.pieceId);
+        this.setPreviousPiece(previousEntry.getPieceId());
+    }
 }

@@ -1,6 +1,8 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 
 import android.Manifest;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -29,10 +32,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.AppDatabase;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.ExhibitHistoryViewModel;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.ExhibitHistoryViewModelFactory;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.HistoryEntry;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.Exhibit;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitPiece;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitResource;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.AppExecutors;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.HistoryUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.ImageUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.JsonUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -43,6 +50,8 @@ import com.google.android.gms.vision.barcode.Barcode;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -72,7 +81,11 @@ public class MainActivity extends AppCompatActivity
     private Exhibit[] mExhibitsList;
     private AppDatabase mHistoryDb;
     private int mPieceId;
+    private int mExhibitId;
+    private int mNextId = HistoryEntry.NONE;
+    private int mPreviousId = HistoryEntry.NONE;
     private HistoryEntry historyEntryForCurrentPiece;
+    private List<HistoryEntry> mHistoryForCurrentExhibit = new ArrayList<>();
     private ExhibitPiece mPiece;
     private String mResourceURL;
 
@@ -82,7 +95,6 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
     @BindView(R.id.nav_view) NavigationView navigationView;
     @BindView(R.id.piece_description_text_view) TextView pieceDescriptionTextView;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -280,20 +292,43 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void loadNewPiece(int pieceId) {
+    private void loadNewPiece(int newPieceId) {
         // TODO: Check database to see if we've viewed this one.
-        // TODO: Update history next and previous.
+        // Update history next and previous.
+        /*int finalEntryId;
+        final HistoryEntry finalEntry = HistoryUtils.getFinalEntry(mHistoryForCurrentExhibit);
+        if (finalEntry != null) {
+            finalEntry.setNextPiece(newPieceId);
+            finalEntryId = finalEntry.getPieceId();
+        } else {
+            finalEntryId = HistoryEntry.NONE;
+        }
+        final HistoryEntry newEntry = new HistoryEntry(mPieceId, mExhibitId, finalEntryId, HistoryEntry.NONE);
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mHistoryDb.historyDao().updateHistory(newEntry);
+                if (finalEntry != null) {
+                    mHistoryDb.historyDao().updateHistory(finalEntry);
+                }
+            }
+        });*/
         // Exhibit ID is encoded in piece ID:
-        int exhibitId = pieceId / 1000;
+        int exhibitId = newPieceId / 1000;
         Exhibit exhibit = Exhibit.getExhibitById(mExhibitsList, exhibitId);
         if (exhibit != null) {
-            ExhibitPiece piece = exhibit.getPieceById(pieceId);
+            ExhibitPiece piece = exhibit.getPieceById(newPieceId);
             if (piece != null) {
-                mPieceId = pieceId;
+                mPieceId = newPieceId;
                 mPiece = piece;
+                mExhibitId = exhibitId;
+                Log.d(PIECE_ID,Integer.toString(mPieceId));
+                return;
             }
         }
-        Log.d(PIECE_ID,Integer.toString(mPieceId));
+        // TODO: Handle this error case.
+        Log.e(PIECE_ID, "pieceId did not correspond to any known ExhibitPiece");
+
 
         // Replace the media player fragment and the resource list fragment.
         // By default, load the piece narration and description, which is the first resource.
@@ -353,8 +388,18 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    // Set up ViewModel
+    // Set up ViewModel.  This should observe the database for items in the current exhibit.
+    // If the database is changed, mHistoryForCurrentExhibit will be updated to reflect the change.
+    // TODO: set up the view model again if the user changes to a different exhibit
     private void setUpViewModel() {
+        /*ExhibitHistoryViewModelFactory factory = new ExhibitHistoryViewModelFactory(mHistoryDb, mExhibitId);
+        final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this, factory).get(ExhibitHistoryViewModel.class);
+        viewModel.getExhibitHistory().observe(this, new Observer<List<HistoryEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<HistoryEntry> historyEntries) {
+                mHistoryForCurrentExhibit = historyEntries;
+            }
+        });*/
     }
 
     @Override
