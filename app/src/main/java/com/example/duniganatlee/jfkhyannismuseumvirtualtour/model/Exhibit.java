@@ -55,4 +55,20 @@ public class Exhibit {
         return null;
     }
 
+    public static ExhibitPiece getPieceById(Exhibit[] exhibits, int id) {
+        int exhibitId = getExhibitId(id);
+        Exhibit exhibit = getExhibitById(exhibits, exhibitId);
+        if (exhibit != null) {
+            for (ExhibitPiece piece : exhibit.getExhibitPieces()) {
+                if (piece.getId() == id) {
+                    return piece;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static int getExhibitId(int pieceId) {
+        return pieceId / 1000;
+    }
 }

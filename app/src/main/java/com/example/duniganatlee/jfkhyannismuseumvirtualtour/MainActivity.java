@@ -16,8 +16,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.SubMenu;
@@ -61,9 +64,7 @@ import butterknife.ButterKnife;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,
-                    MediaPlayerFragment.OnFragmentInteractionListener,
-                    ResourceListFragment.OnListFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     // Request code for launching camera app
     private static final int REQUEST_CAMERA_IMAGE = 1;
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.duniganatlee.fileprovider";
     public static final String PIECE_ID = "piece_id";
     public static final String EXHIBIT_ID = "exhibit_id";
-    private static final int WELCOME_ID = 0;
+    public static final int WELCOME_ID = 0;
     // Path for a temporary photo taken when user scans a barcode.
     private String mTempPhotoPath;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -93,13 +94,14 @@ public class MainActivity extends AppCompatActivity
     private List<HistoryEntry> mHistory = new ArrayList<>();
     private ExhibitPiece mPiece;
     private String mResourceURL;
+    HistoryPagerAdapter mPagerAdapter;
 
     // Views for ButterKnife binding.
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.fab) FloatingActionButton fab;
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
     @BindView(R.id.nav_view) NavigationView navigationView;
-    @BindView(R.id.piece_description_text_view) TextView pieceDescriptionTextView;
+    @BindView(R.id.view_pager) ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -208,11 +210,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-        // TODO: Remove this interface if no interaction is needed.
-    }
-
     // Basic process taken from https://developer.android.com/training/camera/photobasics
     // Also modeled after the Emojify app
     private void getImageFromCamera() {
@@ -247,6 +244,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     // Process data received back from Intents launched by this activity.
+    // Specifically, the camera intent.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -305,7 +303,7 @@ public class MainActivity extends AppCompatActivity
     private void loadNewPiece(int newPieceId) {
         // Set mPiece, mPieceId, and mExhibitId.
         // Exhibit ID is encoded in piece ID:
-        int exhibitId = getExhibitId(newPieceId);
+        int exhibitId = Exhibit.getExhibitId(newPieceId);
         Exhibit exhibit = Exhibit.getExhibitById(mExhibitsList, exhibitId);
         if (exhibit == null) {
             // TODO: Handle this error case.
@@ -324,30 +322,18 @@ public class MainActivity extends AppCompatActivity
                 Log.d(PIECE_ID,Integer.toString(mPieceId));
             }
         }
-
+        // Updating the database will trigger a change observed by the ViewModel,
+        // which will in turn update the adapter on the ViewPagerFragment to show the
+        // new piece in the UI.
         updateDatabase(newPieceId);
-        replaceFragments();
-        // Swap out the description
-        pieceDescriptionTextView.setText(mPiece.getDescription());
+
     }
 
-    private void replaceFragments() {
-        // Replace the media player fragment and the resource list fragment.
-        // By default, load the piece narration and description, which is the first resource.
-        // TODO: Create helper functions in ExhibitPiece to get narration and background.
-        ExhibitResource resource = mPiece.getResources().get(0);
-        MediaPlayerFragment mediaPlayerFragment = MediaPlayerFragment
-                .newInstance(resource.getResourceURL(), resource.getBackgroundImageURL());
-        ResourceListFragment resourceListFragment = ResourceListFragment.newInstance(mPiece);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.media_player_container, mediaPlayerFragment)
-                .replace(R.id.resource_list_container,resourceListFragment)
-                .commit();
-    }
 
     private void updateDatabase(int newPieceId) {
         // TODO: Check database to see if we've viewed this one.
         // Update history next and previous.
+        Log.d("updateDatabase", "Current history size " + mHistory.size());
         int finalEntryId;
         // Get the entry that is currently last on the stack
         final HistoryEntry finalEntry = HistoryUtils.getFinalEntry(mHistory);
@@ -410,6 +396,7 @@ public class MainActivity extends AppCompatActivity
                     mHistoryDb.historyDao().updateHistory(finalEntry);
                 }
                 Context context = getApplicationContext();
+                // Inform widget that data set has changed so it can update listview.
                 AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
                 int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, MuseumHistoryWidget.class));
                 appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list_history);
@@ -461,13 +448,17 @@ public class MainActivity extends AppCompatActivity
 
     // Set up ViewModel.  This should observe the database for items in the current exhibit.
     // If the database is changed, mHistory will be updated to reflect the change.
-    // TODO: set up the view model again if the user changes to a different exhibit?
+    // The viewPager depends on the history, so it will also be assigned a new adapter.
     private void setUpViewModel() {
         final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this).get(ExhibitHistoryViewModel.class);
         viewModel.getHistory().observe(this, new Observer<List<HistoryEntry>>() {
             @Override
             public void onChanged(@Nullable List<HistoryEntry> historyEntries) {
                 mHistory = historyEntries;
+                Log.d("Database change", "New history size " + mHistory.size());
+                mPagerAdapter = new HistoryPagerAdapter(getSupportFragmentManager(), mHistory, mExhibitsList);
+                viewPager.setAdapter(mPagerAdapter);
+                viewPager.setCurrentItem(mHistory.size()-1);
             }
         });
     }
@@ -478,17 +469,4 @@ public class MainActivity extends AppCompatActivity
         outState.putInt(PIECE_ID, mPieceId);
     }
 
-    @Override
-    public void onListFragmentInteraction(ExhibitResource resource) {
-        // Change the media player to the resource that was clicked.
-        MediaPlayerFragment mediaPlayerFragment = MediaPlayerFragment
-                .newInstance(resource.getResourceURL(), resource.getBackgroundImageURL());
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.media_player_container, mediaPlayerFragment)
-                .commit();
-    }
-
-    private int getExhibitId(int pieceId) {
-        return pieceId / 1000;
-    }
 }
