@@ -7,6 +7,7 @@ import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
+import android.database.Cursor;
 
 import java.util.List;
 
@@ -36,5 +37,11 @@ public interface HistoryDao {
     // TODO: Is there a way to replace -1 with a reference to HistoryEntry.NONE?
     @Query("SELECT * FROM history WHERE nextPiece = -1")
     LiveData<HistoryEntry> getLastOnStack();
+
+    // Needed for widget to access database?
+    // See https://github.com/googlesamples/android-architecture-components/blob/master/PersistenceContentProviderSample/app/src/main/java/com/example/android/contentprovidersample/data/CheeseDao.java
+    // and https://stackoverflow.com/questions/46804775/room-persistence-library-and-content-provider
+    @Query("SELECT * FROM history")
+    List<HistoryEntry> loadHistoryList();
 
 }

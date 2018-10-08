@@ -1,8 +1,10 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 
 import android.Manifest;
+import android.appwidget.AppWidgetManager;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -41,6 +43,8 @@ import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.AppExecutors;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.HistoryUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.ImageUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.JsonUtils;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.widget.HistoryWidgetService;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.widget.MuseumHistoryWidget;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -66,7 +70,8 @@ public class MainActivity extends AppCompatActivity
     // Max distance (meters) from JFK museum to be considered "at museum."
     private static final float MAX_DISTANCE_TO_MUSEUM = (float) 100.0;
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.duniganatlee.fileprovider";
-    private static final String PIECE_ID = "piece_id";
+    public static final String PIECE_ID = "piece_id";
+    public static final String EXHIBIT_ID = "exhibit_id";
     private static final int WELCOME_ID = 0;
     // Path for a temporary photo taken when user scans a barcode.
     private String mTempPhotoPath;
@@ -117,8 +122,13 @@ public class MainActivity extends AppCompatActivity
         // Get instance of viewing history database.
         mHistoryDb = AppDatabase.getInstance(getApplicationContext());
 
-        // Find out which exhibit piece we're looking at.  If not specified, view the intro video.
-        if (savedInstanceState != null) {
+        // Find out which exhibit piece we're looking at.  This could come from the savedInstanceState
+        // or from Intent extras (when launched by the MuseumHistoryWidget).
+        // If none of the above, view the default welcome media.
+        Intent sendingIntent = getIntent();
+        if (sendingIntent != null) {
+            mPieceId = sendingIntent.getIntExtra(PIECE_ID, WELCOME_ID);
+        } else if (savedInstanceState != null) {
             Log.d(PIECE_ID, "Getting ID from savedInstanceState");
             mPieceId = savedInstanceState.getInt(PIECE_ID);
         } else {
@@ -293,6 +303,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadNewPiece(int newPieceId) {
+        // Set mPiece, mPieceId, and mExhibitId.
         // Exhibit ID is encoded in piece ID:
         int exhibitId = getExhibitId(newPieceId);
         Exhibit exhibit = Exhibit.getExhibitById(mExhibitsList, exhibitId);
@@ -315,8 +326,12 @@ public class MainActivity extends AppCompatActivity
         }
 
         updateDatabase(newPieceId);
+        replaceFragments();
+        // Swap out the description
+        pieceDescriptionTextView.setText(mPiece.getDescription());
+    }
 
-
+    private void replaceFragments() {
         // Replace the media player fragment and the resource list fragment.
         // By default, load the piece narration and description, which is the first resource.
         // TODO: Create helper functions in ExhibitPiece to get narration and background.
@@ -328,9 +343,6 @@ public class MainActivity extends AppCompatActivity
                 .replace(R.id.media_player_container, mediaPlayerFragment)
                 .replace(R.id.resource_list_container,resourceListFragment)
                 .commit();
-
-        // Swap out the description
-        pieceDescriptionTextView.setText(mPiece.getDescription());
     }
 
     private void updateDatabase(int newPieceId) {
@@ -397,6 +409,10 @@ public class MainActivity extends AppCompatActivity
                 if (finalEntry != null) {
                     mHistoryDb.historyDao().updateHistory(finalEntry);
                 }
+                Context context = getApplicationContext();
+                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+                int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, MuseumHistoryWidget.class));
+                appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list_history);
             }
         });
     }

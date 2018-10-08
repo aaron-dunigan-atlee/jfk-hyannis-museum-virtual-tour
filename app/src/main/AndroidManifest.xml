@@ -6,10 +6,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- WRITE_EXTERNAL_STORAGE needed on Android 4.3 and below to write app-private image files. -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="18" />
 
-    <uses-feature android:name="android.hardware.camera"
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="true" />
 
     <application
@@ -33,11 +35,11 @@
             android:name=".BarcodeScanActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_barcode_scan"
-            android:theme="@style/FullscreenTheme"></activity>
+            android:theme="@style/FullscreenTheme" />
         <!-- Allow device to auto-download barcode library from Mobile Vision. -->
         <meta-data
             android:name="com.google.android.gms.vision.DEPENDENCIES"
-            android:value="barcode"/>
+            android:value="barcode" />
         <!-- FileProvider will be used to pass file URI to/from camera app. -->
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -46,8 +48,22 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
+
+        <receiver android:name=".widget.MuseumHistoryWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/museum_history_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".widget.HistoryWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"/>
     </application>
 
 </manifest>

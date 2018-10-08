@@ -6,7 +6,7 @@ import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
 
 import java.util.List;
-// ViewModel for loading the history database for an exhibit.
+// ViewModel for loading the history database.
 public class ExhibitHistoryViewModel extends AndroidViewModel {
     private LiveData<List<HistoryEntry>> history;
     public ExhibitHistoryViewModel(@NonNull Application application) {

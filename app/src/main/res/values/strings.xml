@@ -27,4 +27,6 @@
     <string name="nav_intro_title">Welcome to JFK Hyannis Museum</string>
     <string name="invalid_barcode">Couldn\'t read that barcode.  Please scan again.</string>
     <string name="icon_description">icon</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
