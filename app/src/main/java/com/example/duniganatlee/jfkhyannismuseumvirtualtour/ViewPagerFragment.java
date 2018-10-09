@@ -1,11 +1,16 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +30,7 @@ import butterknife.ButterKnife;
  * Use the {@link ViewPagerFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ViewPagerFragment extends Fragment
-        implements MediaPlayerFragment.OnFragmentInteractionListener,
-                    ResourceListFragment.OnListFragmentInteractionListener{
+public class ViewPagerFragment extends Fragment {
 
     // Argument keys
     public static final String PIECE_ID = MainActivity.PIECE_ID;
@@ -36,6 +39,7 @@ public class ViewPagerFragment extends Fragment
     private ExhibitPiece mPiece;
     private int mExhibitId;
     private Context mContext;
+    private FragmentActivity mHostActivity;
 
     @BindView(R.id.piece_description_text_view) TextView pieceDescriptionTextView;
 
@@ -68,6 +72,21 @@ public class ViewPagerFragment extends Fragment
         } else {
             mPieceId = MainActivity.WELCOME_ID;
         }
+        FragmentSharedViewModel model = ViewModelProviders.of(mHostActivity).get(FragmentSharedViewModel.class);
+        model.getResource().observe(this, new Observer<ExhibitResource>() {
+            @Override
+            public void onChanged(@Nullable ExhibitResource resource) {
+                if (resource != null) {
+                    FragmentManager fragmentManager = getChildFragmentManager();
+                    MediaPlayerFragment mediaPlayerFragment = MediaPlayerFragment
+                            .newInstance(resource.getResourceURL(), resource.getBackgroundImageURL());
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.media_player_container, mediaPlayerFragment)
+                            .commit();
+
+                }
+            }
+        });
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -85,6 +104,7 @@ public class ViewPagerFragment extends Fragment
         // Replace the media player fragment and the resource list fragment.
         // By default, load the piece narration and description, which is the first resource.
         // TODO: Create helper functions in ExhibitPiece to get narration and background.
+        Log.d("ViewPager", "Replacing fragments.");
         ExhibitResource resource = mPiece.getResources().get(0);
         FragmentManager fragmentManager = getChildFragmentManager();
         MediaPlayerFragment mediaPlayerFragment = MediaPlayerFragment
@@ -97,17 +117,8 @@ public class ViewPagerFragment extends Fragment
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-        // TODO: Remove this interface if no interaction is needed.
-    }
-
-    @Override
-    public void onListFragmentInteraction(ExhibitResource resource) {
-        // Change the media player to the resource that was clicked.
-        MediaPlayerFragment mediaPlayerFragment = MediaPlayerFragment
-                .newInstance(resource.getResourceURL(), resource.getBackgroundImageURL());
-        getChildFragmentManager().beginTransaction()
-                .replace(R.id.media_player_container, mediaPlayerFragment)
-                .commit();
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mHostActivity = (FragmentActivity) context;
     }
 }

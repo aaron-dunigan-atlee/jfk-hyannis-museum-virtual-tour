@@ -1,17 +1,23 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 
+import android.app.Activity;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitResource;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -32,9 +38,6 @@ import butterknife.ButterKnife;
 
 /**
  * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link MediaPlayerFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
  * Use the {@link MediaPlayerFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
@@ -44,15 +47,17 @@ public class MediaPlayerFragment extends Fragment {
     private static final String BACKGROUND_URL = "background_url";
     public static final String NO_MEDIA = "no_media";
     public static final String DEFAULT_BACKGROUND = "default_background";
+    private static final boolean DEFAULT_AUTOPLAY = false;
+    private static final int DEFAULT_WINDOW_INDEX = 0;
+    private static final long DEFAULT_PLAYBACK_POSITION = 0;
 
+    private FragmentActivity mHostActivity;
     private String mBackgroundUrl;
-
-    private OnFragmentInteractionListener mListener;
     private SimpleExoPlayer mExoPlayer;
     private String mMediaUrl;
-    private long exoPlayerPlaybackPosition = 0;
-    private int exoPlayerWindowIndex = 0;
-    private boolean exoPlayerAutoPlay = false;
+    private long exoPlayerPlaybackPosition = DEFAULT_PLAYBACK_POSITION;
+    private int exoPlayerWindowIndex = DEFAULT_WINDOW_INDEX;
+    private boolean exoPlayerAutoPlay = DEFAULT_AUTOPLAY;
     private static final String PLAYBACK_POSITION = "playback_position";
     private static final String WINDOW_INDEX = "window_index";
     private static final String AUTOPLAY = "autoplay";
@@ -92,6 +97,7 @@ public class MediaPlayerFragment extends Fragment {
             mMediaUrl = NO_MEDIA;
             mBackgroundUrl = DEFAULT_BACKGROUND;
         }
+
     }
 
     @Override
@@ -103,58 +109,27 @@ public class MediaPlayerFragment extends Fragment {
 
         // Get the media to be played, and load previous state of player if applicable.
         if (savedInstanceState != null) {
-            exoPlayerAutoPlay = savedInstanceState.getBoolean(AUTOPLAY, false);
-            exoPlayerWindowIndex = savedInstanceState.getInt(WINDOW_INDEX, 0);
-            exoPlayerPlaybackPosition = savedInstanceState.getLong(PLAYBACK_POSITION, 0);
+            exoPlayerAutoPlay = savedInstanceState.getBoolean(AUTOPLAY, DEFAULT_AUTOPLAY);
+            exoPlayerWindowIndex = savedInstanceState.getInt(WINDOW_INDEX, DEFAULT_WINDOW_INDEX);
+            exoPlayerPlaybackPosition = savedInstanceState.getLong(PLAYBACK_POSITION, DEFAULT_PLAYBACK_POSITION);
         }
 
         return rootView;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    // TODO: Probably remove this interface. No need for interaction with this fragment, right?
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        // Thanks for this method of getting the host activity from
+        // https://stackoverflow.com/a/31302716/10332984
+        mHostActivity = (FragmentActivity) context;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        initializePlayer(mMediaUrl);
+        initializePlayer();
+        playMedia(mMediaUrl, mBackgroundUrl, exoPlayerAutoPlay, exoPlayerWindowIndex, exoPlayerPlaybackPosition);
     }
 
     @Override
@@ -164,38 +139,39 @@ public class MediaPlayerFragment extends Fragment {
     }
 
     // Initialize ExoPlayer.  See https://google.github.io/ExoPlayer/guide.html
-    public void initializePlayer(String mediaUrl) {
-        Context context = getContext();
-        Uri mediaUri = Uri.parse(mediaUrl);
+    public void initializePlayer() {
         if (mExoPlayer == null) {
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
-            RenderersFactory renderersFactory = new DefaultRenderersFactory(context);
+            RenderersFactory renderersFactory = new DefaultRenderersFactory(mHostActivity);
             mExoPlayer = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector, loadControl);
-            if (mBackgroundUrl != null) {
-                if (mBackgroundUrl.equals(DEFAULT_BACKGROUND)) {
-                    Log.d("intitalizePlayer","Setting default artwork.");
-                    // TODO: Choose default artwork.
-                    mExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource
-                            (getResources(), R.drawable.jfklogo_bluebg_mobile));
-                } else {
-                    // TODO: Load background URL image and set it.
-                    // might have to build a Picasso Target.  See https://square.github.io/picasso/2.x/picasso/com/squareup/picasso/Target.html
-                    // https://www.codexpedia.com/android/android-download-and-save-image-through-picasso/
-
-                }
-            }
             mExoPlayerView.setPlayer(mExoPlayer);
-            if (!mMediaUrl.equals(NO_MEDIA)) {
-                //Prepare media source.  See https://google.github.io/ExoPlayer/guide.html#preparing-the-player
-                String appName = getString(R.string.app_name);
-                String userAgent = Util.getUserAgent(context, appName);
-                MediaSource mediaSource = new ExtractorMediaSource.Factory(
-                        new DefaultDataSourceFactory(context, userAgent)).createMediaSource(mediaUri);
-                mExoPlayer.prepare(mediaSource);
-                mExoPlayer.setPlayWhenReady(exoPlayerAutoPlay);
-                mExoPlayer.seekTo(exoPlayerWindowIndex, exoPlayerPlaybackPosition);
+        }
+    }
+
+    private void playMedia(String mediaUrl, String backgroundUrl, boolean autoPlay, int windowIndex, long playbackPosition) {
+        if (backgroundUrl != null) {
+            if (backgroundUrl.equals(DEFAULT_BACKGROUND)) {
+                Log.d("intitalizePlayer","Setting default artwork.");
+                // TODO: Choose default artwork.
+                mExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource
+                        (getResources(), R.drawable.jfklogo_bluebg_mobile));
+            } else {
+                // TODO: Load background URL image and set it.
+                // might have to build a Picasso Target.  See https://square.github.io/picasso/2.x/picasso/com/squareup/picasso/Target.html
+                // https://www.codexpedia.com/android/android-download-and-save-image-through-picasso/
             }
+        }
+        Uri mediaUri = Uri.parse(mediaUrl);
+        if (!mediaUrl.equals(NO_MEDIA)) {
+            //Prepare media source.  See https://google.github.io/ExoPlayer/guide.html#preparing-the-player
+            String appName = getString(R.string.app_name);
+            String userAgent = Util.getUserAgent(mHostActivity, appName);
+            MediaSource mediaSource = new ExtractorMediaSource.Factory(
+                    new DefaultDataSourceFactory(mHostActivity, userAgent)).createMediaSource(mediaUri);
+            mExoPlayer.prepare(mediaSource);
+            mExoPlayer.setPlayWhenReady(autoPlay);
+            mExoPlayer.seekTo(windowIndex, playbackPosition);
         }
     }
 

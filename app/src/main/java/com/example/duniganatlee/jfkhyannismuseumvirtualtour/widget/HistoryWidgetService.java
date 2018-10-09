@@ -89,14 +89,13 @@ class HistoryRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 
         // Set onclick intent using a fillInIntent which interprets the PendingIntentTemplate
         // which was set in MuseumHistoryWidget onCreate().
-        // Specifically, specify which piece to open in Main Activity.
+        // Specifically, specify which piece to open in Main Activity by sending its position in the history.
         // TODO: Currently, this intent opens a new instance of the MainActivity, moving the current instance to the back stack.
         // How do I make this so it opens in the current instance, or at least removes the current instance from the back stack?
         // I don't need multiple instances of MainActivity sucking up resources, since my app handles history internally.
         // Is this related to LuanchMode (singleTop, etc.)?
         Intent fillInIntent = new Intent();
-        fillInIntent.putExtra(MainActivity.PIECE_ID, pieceId);
-        fillInIntent.putExtra(MainActivity.EXHIBIT_ID, exhibitId);
+        fillInIntent.putExtra(MainActivity.HISTORY_POSITION, position);
         views.setOnClickFillInIntent(R.id.widget_text_history_item, fillInIntent);
 
         return views;

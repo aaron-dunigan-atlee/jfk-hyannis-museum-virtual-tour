@@ -16,8 +16,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
@@ -33,7 +31,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.AppDatabase;
@@ -41,12 +38,10 @@ import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.ExhibitHist
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.HistoryEntry;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.Exhibit;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitPiece;
-import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitResource;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.AppExecutors;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.HistoryUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.ImageUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.JsonUtils;
-import com.example.duniganatlee.jfkhyannismuseumvirtualtour.widget.HistoryWidgetService;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.widget.MuseumHistoryWidget;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -73,7 +68,10 @@ public class MainActivity extends AppCompatActivity
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.duniganatlee.fileprovider";
     public static final String PIECE_ID = "piece_id";
     public static final String EXHIBIT_ID = "exhibit_id";
+    public static final String HISTORY_POSITION = "history_position";
     public static final int WELCOME_ID = 0;
+    private static final int HISTORY_END = -1;
+
     // Path for a temporary photo taken when user scans a barcode.
     private String mTempPhotoPath;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -95,6 +93,7 @@ public class MainActivity extends AppCompatActivity
     private ExhibitPiece mPiece;
     private String mResourceURL;
     HistoryPagerAdapter mPagerAdapter;
+    private int mHistoryPosition;
 
     // Views for ButterKnife binding.
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -122,23 +121,20 @@ public class MainActivity extends AppCompatActivity
         mExhibitsList = JsonUtils.parseExhibitList(mExhibitsJson);
 
         // Get instance of viewing history database.
-        mHistoryDb = AppDatabase.getInstance(getApplicationContext());
+        mHistoryDb = AppDatabase.getInstance(getApplication());
 
-        // Find out which exhibit piece we're looking at.  This could come from the savedInstanceState
+        // Find out which position in the history we'd like to view.
+        // This could come from the savedInstanceState
         // or from Intent extras (when launched by the MuseumHistoryWidget).
-        // If none of the above, view the default welcome media.
+        // If none of the above, view the end of the history stack (last piece viewed).
         Intent sendingIntent = getIntent();
         if (sendingIntent != null) {
-            mPieceId = sendingIntent.getIntExtra(PIECE_ID, WELCOME_ID);
+            mHistoryPosition = sendingIntent.getIntExtra(HISTORY_POSITION, HISTORY_END);
         } else if (savedInstanceState != null) {
-            Log.d(PIECE_ID, "Getting ID from savedInstanceState");
-            mPieceId = savedInstanceState.getInt(PIECE_ID);
+            mHistoryPosition = savedInstanceState.getInt(HISTORY_POSITION);
         } else {
-            mPieceId = WELCOME_ID;
+            mHistoryPosition = HISTORY_END;
         }
-
-        // Populate views
-        loadNewPiece(mPieceId);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -158,10 +154,9 @@ public class MainActivity extends AppCompatActivity
         // Get location services client.
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        // Set up ViewModel
+        // Set up ViewModel.  This will trigger the observer's onChange, which will
+        // take care of loading the UI by loading the ViewPagerFragment.
         setUpViewModel();
-
-
     }
 
     @Override
@@ -292,7 +287,7 @@ public class MainActivity extends AppCompatActivity
                     int barcodePieceId = Integer.parseInt(splitBarcodeText[2]);
                     Log.d("Barcode Exhibit",Integer.toString(barcodeExhibitId));
                     Log.d("Barcode Piece",Integer.toString(barcodePieceId));
-                    loadNewPiece(barcodePieceId);
+                    updateDatabase(barcodePieceId);
                 } catch (IndexOutOfBoundsException ex) {
                     Log.d("Barcode", "Bad barcode read.  Exhibit or piece ID not found.");
                 }
@@ -300,38 +295,42 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void loadNewPiece(int newPieceId) {
+    // Set member variables related to the current piece.
+    // This is called from the ViewModel observer's onChange() method.
+    private void setCurrentPiece(int pieceId) {
         // Set mPiece, mPieceId, and mExhibitId.
         // Exhibit ID is encoded in piece ID:
-        int exhibitId = Exhibit.getExhibitId(newPieceId);
+        int exhibitId = Exhibit.getExhibitId(pieceId);
         Exhibit exhibit = Exhibit.getExhibitById(mExhibitsList, exhibitId);
         if (exhibit == null) {
             // TODO: Handle this error case.
             Log.e(PIECE_ID, "exhibitId did not correspond to any known Exhibit");
             return;
         } else {
-            ExhibitPiece piece = exhibit.getPieceById(newPieceId);
+            ExhibitPiece piece = exhibit.getPieceById(pieceId);
             if (piece == null) {
                 // TODO: Handle this error case.
                 Log.e(PIECE_ID, "pieceId did not correspond to any known ExhibitPiece");
                 return;
             } else {
-                mPieceId = newPieceId;
+                mPieceId = pieceId;
                 mPiece = piece;
                 mExhibitId = exhibitId;
-                Log.d(PIECE_ID,Integer.toString(mPieceId));
             }
         }
-        // Updating the database will trigger a change observed by the ViewModel,
-        // which will in turn update the adapter on the ViewPagerFragment to show the
-        // new piece in the UI.
-        updateDatabase(newPieceId);
-
     }
 
-
+    // This method updates the database when a new piece is viewed.
+    // Updating the database will trigger a change observed by the ViewModel,
+    // which will in turn update the adapter on the ViewPagerFragment to show the
+    // new piece in the UI.
     private void updateDatabase(int newPieceId) {
-        // TODO: Check database to see if we've viewed this one.
+        // This will cause the ViewPager to scroll to the new piece:
+        mHistoryPosition = HISTORY_END;
+        // We want to collect all entries to be updated in the db,
+        // so we can make just one insertion/update operation; otherwise
+        // onChange() may be called multiple times for this one change.
+        final List<HistoryEntry> entriesToUpdate = new ArrayList<>();
         // Update history next and previous.
         Log.d("updateDatabase", "Current history size " + mHistory.size());
         int finalEntryId;
@@ -341,14 +340,24 @@ public class MainActivity extends AppCompatActivity
         if (finalEntry != null) {
             finalEntry.setNextPiece(newPieceId);
             finalEntryId = finalEntry.getPieceId();
-            // Check if the new piece is the same as the final one on the stack; if so, no need to update db.
-            if (finalEntryId == newPieceId) {return;}
+            // Check if the new piece is the same as the final one on the stack;
+            // if so, no need to update db.  But we do want to page to that piece if we're
+            // currently viewing another.
+            if (finalEntryId == newPieceId) {
+                viewPager.setCurrentItem(mHistory.size()-1);
+                return;
+            } else {
+                entriesToUpdate.add(finalEntry);
+            }
         } else {
             finalEntryId = HistoryEntry.NONE;
         }
+
+        // Check if we've viewed this piece before:
         HistoryEntry previousInstance = HistoryUtils.getEntryById(mHistory, newPieceId);
-        // If previousInstance is not null, user has viewed this entry before.  Therefore we need to link
-        // this entry's previous to its next.
+        // If previousInstance is not null, user has viewed this piece before.
+        // Therefore we need to link this entry's previous to its next
+        // (i.e. remove this entry from its previous place in the linked list).
         if (previousInstance != null) {
             final HistoryEntry previousEntry = HistoryUtils.getEntryById(mHistory, previousInstance.getPreviousPiece());
             final HistoryEntry nextEntry = HistoryUtils.getEntryById(mHistory, previousInstance.getNextPiece());
@@ -369,37 +378,24 @@ public class MainActivity extends AppCompatActivity
                     nextEntry.setPreviousPiece(HistoryEntry.NONE);
                 }
             }
-            // Update previousEntry and nextEntry, if applicable, in the database.
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    // As we're using a ViewModel observer, these database updates will
-                    // be automatically added to the mHistory field.
-                    if (previousEntry != null) {
-                        mHistoryDb.historyDao().updateHistory(previousEntry);
-                    }
-                    if (nextEntry != null) {
-                        mHistoryDb.historyDao().updateHistory(nextEntry);
-                    }
-                }
-            });
+            // Add previousEntry and nextEntry, if applicable, to the update list.
+            if (previousEntry != null) {
+                entriesToUpdate.add(previousEntry);
+            }
+            if (nextEntry != null) {
+                entriesToUpdate.add(nextEntry);
+            }
         }
-        // Now create the new entry and update the previous final entry if necessary.
-        final HistoryEntry newEntry = new HistoryEntry(mPieceId, mExhibitId, finalEntryId, HistoryEntry.NONE);
+        // Now create the new entry and update the old final entry if necessary.
+        final HistoryEntry newEntry = new HistoryEntry(newPieceId,
+                Exhibit.getExhibitId(newPieceId), finalEntryId, HistoryEntry.NONE);
+        entriesToUpdate.add(newEntry);
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
                 // As we're using a ViewModel observer, these database updates will
                 // be automatically added to the mHistory field.
-                mHistoryDb.historyDao().updateOrAddToHistory(newEntry);
-                if (finalEntry != null) {
-                    mHistoryDb.historyDao().updateHistory(finalEntry);
-                }
-                Context context = getApplicationContext();
-                // Inform widget that data set has changed so it can update listview.
-                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-                int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, MuseumHistoryWidget.class));
-                appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list_history);
+                mHistoryDb.historyDao().updateOrAddToHistory(entriesToUpdate);
             }
         });
     }
@@ -450,15 +446,49 @@ public class MainActivity extends AppCompatActivity
     // If the database is changed, mHistory will be updated to reflect the change.
     // The viewPager depends on the history, so it will also be assigned a new adapter.
     private void setUpViewModel() {
+        Log.d("setUpViewModel","Setting up view model...");
         final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this).get(ExhibitHistoryViewModel.class);
         viewModel.getHistory().observe(this, new Observer<List<HistoryEntry>>() {
             @Override
             public void onChanged(@Nullable List<HistoryEntry> historyEntries) {
                 mHistory = historyEntries;
                 Log.d("Database change", "New history size " + mHistory.size());
-                mPagerAdapter = new HistoryPagerAdapter(getSupportFragmentManager(), mHistory, mExhibitsList);
-                viewPager.setAdapter(mPagerAdapter);
-                viewPager.setCurrentItem(mHistory.size()-1);
+                if (mHistory.size() == 0) {
+                    // History is empty, so add Welcome as the first entry.  This will
+                    // re-trigger onChanged and then we'll display the viewPager.
+                    final HistoryEntry firstEntry = new HistoryEntry(WELCOME_ID,
+                            Exhibit.getExhibitId(WELCOME_ID), HistoryEntry.NONE, HistoryEntry.NONE);
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            mHistoryDb.historyDao().addToHistory(firstEntry);
+                        }
+                    });
+                } else {
+                    // Set current piece info (mPieceId, mExhibitId, mPiece).
+                    if (mHistoryPosition == HISTORY_END) {
+                        setCurrentPiece(HistoryUtils.getFinalEntry(mHistory)
+                                .getPieceId());
+                    } else {
+                        setCurrentPiece(HistoryUtils.getEntryByPosition(mHistory, mHistoryPosition)
+                                .getPieceId());
+                    }
+
+                    // Inform widget that data set has changed so it can update listview.
+                    Context context = getApplicationContext();
+                    AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+                    int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, MuseumHistoryWidget.class));
+                    appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list_history);
+
+                    // Re-set viewPager with updated history.
+                    mPagerAdapter = new HistoryPagerAdapter(getSupportFragmentManager(), mHistory, mExhibitsList);
+                    viewPager.setAdapter(mPagerAdapter);
+                    if (mHistoryPosition == HISTORY_END) {
+                        viewPager.setCurrentItem(mHistory.size() - 1);
+                    } else {
+                        viewPager.setCurrentItem(mHistoryPosition);
+                    }
+                }
             }
         });
     }
@@ -466,7 +496,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(PIECE_ID, mPieceId);
+        outState.putInt(HISTORY_POSITION, mHistoryPosition);
     }
 
 }

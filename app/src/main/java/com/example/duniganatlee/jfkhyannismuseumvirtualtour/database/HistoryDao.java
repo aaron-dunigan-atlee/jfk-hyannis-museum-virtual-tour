@@ -25,6 +25,9 @@ public interface HistoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void updateOrAddToHistory(HistoryEntry historyEntry);
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void updateOrAddToHistory(List<HistoryEntry> historyEntries);
+
     @Insert
     void addToHistory(HistoryEntry historyEntry);
 
