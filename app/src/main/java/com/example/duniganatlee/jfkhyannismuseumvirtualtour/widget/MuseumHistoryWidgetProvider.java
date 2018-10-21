@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Implementation of App Widget functionality.
  */
-public class MuseumHistoryWidget extends AppWidgetProvider {
+public class MuseumHistoryWidgetProvider extends AppWidgetProvider {
     private static final String WIDGET_LOG_TAG = "WidgetProvider";
     public static List<HistoryEntry> mHistory = new ArrayList<>();
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {

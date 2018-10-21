@@ -7,9 +7,6 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <string name="title_activity_barcode_scan">BarcodeScanActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
@@ -29,4 +26,21 @@
     <string name="icon_description">icon</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
+    <string name="location_alert_title">Location Alert</string>
+    <string name="location_alert_message">It appears that you are not currently at the JFK Hyannis Museum.  You will not be able to scan barcodes if you are not at the museum.  You can view your history from a previous visit for 30 days.  Would you like to visit the museum\'s website to order tickets?</string>
+    <string name="cancel_location_alert">Cancel</string>
+    <string name="okay_location_alert">Buy tickets</string>
+    <string name="museum_tickets_url">https://fareharbor.com/embeds/book/jfkhyannismuseum/items/32134/calendar/?full-items=yes</string>
+    <string name="museum_website_url">https://jfkhyannismuseum.org/</string>
+    <string name="nav_visit_website">Museum website</string>
+    <string name="nav_get_tickets">Purchase tickets</string>
+    <string name="nav_drawer_visit_subtitle">Visit</string>
+    <string name="app_short_name">JFK Hyannis Museum</string>
+    <string name="resource_title">Resource title</string>
+    <string name="long_resource_title">A really long resource title that might wrap over two or more lines.</string>
+    <string name="json_url">https://jfkhyannismuseum.org/wp-content/mobile-app-data/exhibits.json</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="default_image_description">An image from the JFK Hyannis Museum.</string>
 </resources>

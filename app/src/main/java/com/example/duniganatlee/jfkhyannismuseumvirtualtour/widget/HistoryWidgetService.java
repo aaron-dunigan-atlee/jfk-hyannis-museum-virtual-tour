@@ -88,7 +88,7 @@ class HistoryRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
         views.setTextViewText(R.id.widget_text_history_item, exhibitPieceTitle);
 
         // Set onclick intent using a fillInIntent which interprets the PendingIntentTemplate
-        // which was set in MuseumHistoryWidget onCreate().
+        // which was set in MuseumHistoryWidgetProvider onCreate().
         // Specifically, specify which piece to open in Main Activity by sending its position in the history.
         // TODO: Currently, this intent opens a new instance of the MainActivity, moving the current instance to the back stack.
         // How do I make this so it opens in the current instance, or at least removes the current instance from the back stack?

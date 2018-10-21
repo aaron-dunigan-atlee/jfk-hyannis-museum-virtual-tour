@@ -1,26 +1,23 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 
-import android.Manifest;
+import android.app.Activity;
+import android.os.AsyncTask;
+import android.support.v4.app.DialogFragment;
 import android.appwidget.AppWidgetManager;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -42,15 +39,14 @@ import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.AppExecutors;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.HistoryUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.ImageUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.JsonUtils;
-import com.example.duniganatlee.jfkhyannismuseumvirtualtour.widget.MuseumHistoryWidget;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.vision.barcode.Barcode;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.LocationAlertDialog;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.LocationUtils;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.NetworkUtils;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.widget.MuseumHistoryWidgetProvider;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,39 +55,26 @@ import butterknife.ButterKnife;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+                    LocationAlertDialog.LocationAlertListener {
 
     // Request code for launching camera app
     private static final int REQUEST_CAMERA_IMAGE = 1;
-    // Max distance (meters) from JFK museum to be considered "at museum."
-    private static final float MAX_DISTANCE_TO_MUSEUM = (float) 100.0;
+
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.duniganatlee.fileprovider";
     public static final String PIECE_ID = "piece_id";
-    public static final String EXHIBIT_ID = "exhibit_id";
     public static final String HISTORY_POSITION = "history_position";
     public static final int WELCOME_ID = 0;
     private static final int HISTORY_END = -1;
+    private static final String LOCATION_FRAGMENT_TAG = "location";
+    private static final String NO_NETWORK_WARNING = "Network is not available.";
 
     // Path for a temporary photo taken when user scans a barcode.
     private String mTempPhotoPath;
-    private FusedLocationProviderClient mFusedLocationClient;
-    // Constants for checking permissions.
-    private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
-    // Whether the user is currently at the JFK Hyannis museum
-    private boolean mAtMuseum = false;
 
-    private String mExhibitsJson = null;
     private Exhibit[] mExhibitsList;
     private AppDatabase mHistoryDb;
-    private int mPieceId;
-    // TODO: we probably no longer need mExhibitId.  Remove instances.
-    private int mExhibitId;
-    private int mNextId = HistoryEntry.NONE;
-    private int mPreviousId = HistoryEntry.NONE;
-    private HistoryEntry historyEntryForCurrentPiece;
     private List<HistoryEntry> mHistory = new ArrayList<>();
-    private ExhibitPiece mPiece;
-    private String mResourceURL;
     HistoryPagerAdapter mPagerAdapter;
     private int mHistoryPosition;
 
@@ -107,6 +90,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        viewPager.addOnPageChangeListener(pageChangeListener);
+        setTitle(R.string.app_short_name);
         setSupportActionBar(toolbar);
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -116,16 +101,14 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        // TODO: Handle error loading JSON.
-        mExhibitsJson = JsonUtils.loadJSONFromAsset(this);
-        mExhibitsList = JsonUtils.parseExhibitList(mExhibitsJson);
+        LocationUtils.checkLocation(this);
 
         // Get instance of viewing history database.
         mHistoryDb = AppDatabase.getInstance(getApplication());
 
         // Find out which position in the history we'd like to view.
         // This could come from the savedInstanceState
-        // or from Intent extras (when launched by the MuseumHistoryWidget).
+        // or from Intent extras (when launched by the MuseumHistoryWidgetProvider).
         // If none of the above, view the end of the history stack (last piece viewed).
         Intent sendingIntent = getIntent();
         if (sendingIntent != null) {
@@ -141,22 +124,18 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
-        // Add exhibit titles to navigation drawer menu.
-        // https://freakycoder.com/android-notes-53-how-to-create-menu-item-for-navigationdrawer-programmatically-67ddfa8027bc
-        // Note that Menu.findItem(id) finds by *resource* id, whereas Menu.getItem(index) gets by position.
-        // https://developer.android.com/reference/android/view/Menu#findItem(int)
-        SubMenu exhibitsMenu = navigationView.getMenu().findItem(R.id.nav_exhibits_section).getSubMenu();
-        for (Exhibit exhibit: mExhibitsList) {
-            exhibitsMenu.add(exhibit.getExhibitTitle())
-                .setIcon(R.drawable.ic_menu_gallery);
+
+
+        /* Use an AsyncTask to load the JSON file from the web. */
+        if (NetworkUtils.deviceIsConnected(this)) {
+            String jsonUrlString = getString(R.string.json_url);
+            URL jsonUrl = NetworkUtils.buildUrl(jsonUrlString);
+            JsonQueryTask queryTask = new JsonQueryTask();
+            queryTask.execute(jsonUrl);
+        } else {
+            Toast.makeText(this, NO_NETWORK_WARNING, Toast.LENGTH_LONG).show();
+            // TODO: Check if json is stored locally.
         }
-
-        // Get location services client.
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        // Set up ViewModel.  This will trigger the observer's onChange, which will
-        // take care of loading the UI by loading the ViewPagerFragment.
-        setUpViewModel();
     }
 
     @Override
@@ -195,12 +174,13 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
         if (id == R.id.nav_camera) {
             getImageFromCamera();
-        } else if (id == R.id.nav_location) {
-            checkLocation(this);
-        }
+        } else if (id == R.id.get_tickets) {
+            launchTicketPurchase();
+        } else if (id == R.id.visit_website) {
+            visitWebsite();
+        } 
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -208,6 +188,12 @@ public class MainActivity extends AppCompatActivity
     // Basic process taken from https://developer.android.com/training/camera/photobasics
     // Also modeled after the Emojify app
     private void getImageFromCamera() {
+        // if (!LocationUtils.userIsAtMuseum) {
+        if (false) {
+            DialogFragment locationAlertDialog = new LocationAlertDialog();
+            locationAlertDialog.show(getSupportFragmentManager(), LOCATION_FRAGMENT_TAG);
+            return;
+        }
         // Intent to launch the camera.
         Intent launchCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Check if there's an app to handle this intent.
@@ -235,7 +221,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             Toast.makeText(this,getString(R.string.no_camera_app),Toast.LENGTH_LONG).show();
         }
-
     }
 
     // Process data received back from Intents launched by this activity.
@@ -246,59 +231,22 @@ public class MainActivity extends AppCompatActivity
         // If the image capture activity was called and was successful
         if (requestCode == REQUEST_CAMERA_IMAGE && resultCode == RESULT_OK) {
             // Extract the barcode and use its information.
-            processImage();
+            Integer pieceId = ImageUtils.getBarcodeFromImage(this, mTempPhotoPath);
+            if (pieceId == null) {
+                Toast.makeText(this, getString(R.string.invalid_barcode), Toast.LENGTH_LONG).show();
+            } else {
+                updateDatabase(pieceId);
+            }
         } else {
             // Otherwise, delete the temporary image file
             ImageUtils.deleteTemporaryImageFile(this, mTempPhotoPath);
         }
     }
 
-    private void processImage() {
-        SparseArray<Barcode> barcodes = ImageUtils.detectBarcodes(this, mTempPhotoPath);
-        ImageUtils.deleteTemporaryImageFile(this, mTempPhotoPath);
-        if (barcodes != null) {
-            // Check that there is exactly one barcode detected.
-            if (barcodes.size() == 1) {
-                Barcode barcode = barcodes.valueAt(0);
-                String barcodeContent = barcode.rawValue;
-                Log.d("Barcode found", barcodeContent);
-                processBarcode(barcode);
-            } else if (barcodes.size() == 0) {
-                Toast.makeText(this, getString(R.string.no_barcode_in_image), Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, getString(R.string.multiple_barcodes_in_image), Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    private void processBarcode(Barcode barcode) {
-        // Check that the user has scanned a valid barcode for this app.
-        if (barcode.valueFormat != Barcode.TEXT) {
-            Toast.makeText(this, getString(R.string.invalid_barcode), Toast.LENGTH_LONG).show();
-        } else /* We have a text barcode */ {
-            String barcodeText = barcode.displayValue;
-            if (!barcodeText.startsWith("JFK Hyannis Museum")) {
-                Toast.makeText(this, getString(R.string.invalid_barcode), Toast.LENGTH_LONG).show();
-            } else /* We have a barcode for this app. */ {
-                String splitBarcodeText[] = barcodeText.split("\n");
-                try {
-                    // TODO: Remove exhibit ID from barcode format?
-                    int barcodeExhibitId = Integer.parseInt(splitBarcodeText[1]);
-                    int barcodePieceId = Integer.parseInt(splitBarcodeText[2]);
-                    Log.d("Barcode Exhibit",Integer.toString(barcodeExhibitId));
-                    Log.d("Barcode Piece",Integer.toString(barcodePieceId));
-                    updateDatabase(barcodePieceId);
-                } catch (IndexOutOfBoundsException ex) {
-                    Log.d("Barcode", "Bad barcode read.  Exhibit or piece ID not found.");
-                }
-            }
-        }
-    }
-
-    // Set member variables related to the current piece.
+    // Make sure current piece is valid.
+    // TODO: Do we really need this?
     // This is called from the ViewModel observer's onChange() method.
-    private void setCurrentPiece(int pieceId) {
-        // Set mPiece, mPieceId, and mExhibitId.
+    private void checkPieceIsValid(int pieceId) {
         // Exhibit ID is encoded in piece ID:
         int exhibitId = Exhibit.getExhibitId(pieceId);
         Exhibit exhibit = Exhibit.getExhibitById(mExhibitsList, exhibitId);
@@ -306,18 +254,14 @@ public class MainActivity extends AppCompatActivity
             // TODO: Handle this error case.
             Log.e(PIECE_ID, "exhibitId did not correspond to any known Exhibit");
             return;
-        } else {
-            ExhibitPiece piece = exhibit.getPieceById(pieceId);
-            if (piece == null) {
-                // TODO: Handle this error case.
-                Log.e(PIECE_ID, "pieceId did not correspond to any known ExhibitPiece");
-                return;
-            } else {
-                mPieceId = pieceId;
-                mPiece = piece;
-                mExhibitId = exhibitId;
-            }
         }
+        ExhibitPiece piece = exhibit.getPieceById(pieceId);
+        if (piece == null) {
+            // TODO: Handle this error case.
+            Log.e(PIECE_ID, "pieceId did not correspond to any known ExhibitPiece");
+            return;
+        }
+        Log.d(PIECE_ID, "Piece ID is valid.");
     }
 
     // This method updates the database when a new piece is viewed.
@@ -331,7 +275,6 @@ public class MainActivity extends AppCompatActivity
         // so we can make just one insertion/update operation; otherwise
         // onChange() may be called multiple times for this one change.
         final List<HistoryEntry> entriesToUpdate = new ArrayList<>();
-        // Update history next and previous.
         Log.d("updateDatabase", "Current history size " + mHistory.size());
         int finalEntryId;
         // Get the entry that is currently last on the stack
@@ -400,47 +343,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    // Check whether we are at the museum.
-    // Location checking based on https://developer.android.com/training/location/retrieve-current
-    private void checkLocation(final Context context) {
-        final String LOCATION_TAG = "Location";
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_FINE_LOCATION);
-        } else {
-            mFusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location currentLocation) {
-                            // Got last known location. In some rare situations this can be null.
-                            if (currentLocation == null) {
-                                // Logic to handle location object
-                                Log.d(LOCATION_TAG,"Null location.");
-                            } else {
-                                Log.d(LOCATION_TAG, currentLocation.toString());
-                                Log.d("Location provider",currentLocation.getProvider());
-                                float museumLatitude = Float.parseFloat(getString(R.string.jfk_museum_latitude));
-                                float museumLongitude = Float.parseFloat(getString(R.string.jfk_museum_longitude));
-                                Location museumLocation = new Location(currentLocation);
-                                museumLocation.setLatitude(museumLatitude);
-                                museumLocation.setLongitude(museumLongitude);
-                                float distanceToMuseum = currentLocation.distanceTo(museumLocation);
-                                Log.d("Distance to museum",Float.toString(distanceToMuseum));
-                                mAtMuseum = (distanceToMuseum < MAX_DISTANCE_TO_MUSEUM);
-                            }
-                        }
-                    })
-                    .addOnFailureListener(this, new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.d("Location",e.toString());
-                        }
-                    });
-        }
-    }
+
 
     // Set up ViewModel.  This should observe the database for items in the current exhibit.
     // If the database is changed, mHistory will be updated to reflect the change.
@@ -452,6 +355,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onChanged(@Nullable List<HistoryEntry> historyEntries) {
                 mHistory = historyEntries;
+                if (mHistory == null) return;
                 Log.d("Database change", "New history size " + mHistory.size());
                 if (mHistory.size() == 0) {
                     // History is empty, so add Welcome as the first entry.  This will
@@ -467,17 +371,17 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     // Set current piece info (mPieceId, mExhibitId, mPiece).
                     if (mHistoryPosition == HISTORY_END) {
-                        setCurrentPiece(HistoryUtils.getFinalEntry(mHistory)
+                        checkPieceIsValid(HistoryUtils.getFinalEntry(mHistory)
                                 .getPieceId());
                     } else {
-                        setCurrentPiece(HistoryUtils.getEntryByPosition(mHistory, mHistoryPosition)
+                        checkPieceIsValid(HistoryUtils.getEntryByPosition(mHistory, mHistoryPosition)
                                 .getPieceId());
                     }
 
                     // Inform widget that data set has changed so it can update listview.
                     Context context = getApplicationContext();
                     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-                    int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, MuseumHistoryWidget.class));
+                    int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, MuseumHistoryWidgetProvider.class));
                     appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list_history);
 
                     // Re-set viewPager with updated history.
@@ -488,6 +392,7 @@ public class MainActivity extends AppCompatActivity
                     } else {
                         viewPager.setCurrentItem(mHistoryPosition);
                     }
+
                 }
             }
         });
@@ -498,5 +403,94 @@ public class MainActivity extends AppCompatActivity
         super.onSaveInstanceState(outState);
         outState.putInt(HISTORY_POSITION, mHistoryPosition);
     }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        launchTicketPurchase();
+    }
+
+    private void launchTicketPurchase() {
+        Uri webpage = Uri.parse(getString(R.string.museum_tickets_url));
+        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
+    private void visitWebsite() {
+        Uri webpage = Uri.parse(getString(R.string.museum_website_url));
+        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
+
+    private class JsonQueryTask extends AsyncTask<URL, Void, String> {
+        @Override
+        protected String doInBackground(URL... urls) {
+            String result = null;
+            try {
+                result = NetworkUtils.getResponseFromHttpUrl(urls[0]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String exhibitsJson) {
+            super.onPostExecute(exhibitsJson);
+            if (exhibitsJson != null) {
+                mExhibitsList = JsonUtils.parseExhibitList(exhibitsJson);
+                // TODO: Store json locally.
+
+            } else {
+                // TODO: Load json from local copy if it exitsts.
+                // If not, fail gracefully.
+            }
+
+            // Add exhibit titles to navigation drawer menu.
+            // https://freakycoder.com/android-notes-53-how-to-create-menu-item-for-navigationdrawer-programmatically-67ddfa8027bc
+            // Note that Menu.findItem(id) finds by *resource* id, whereas Menu.getItem(index) gets by position.
+            // https://developer.android.com/reference/android/view/Menu#findItem(int)
+            SubMenu exhibitsMenu = navigationView.getMenu().findItem(R.id.nav_exhibits_section).getSubMenu();
+            for (Exhibit exhibit: mExhibitsList) {
+                exhibitsMenu.add(exhibit.getExhibitTitle())
+                        .setIcon(R.drawable.ic_menu_gallery);
+                // TODO: Add actions for clicking exhibits.
+            }
+
+            // Set up ViewModel.  This will trigger the observer's onChange, which will
+            // take care of loading the UI by loading the ViewPagerFragment.
+            setUpViewModel();
+        }
+    }
+    private ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {
+
+        @Override
+        public void onPageSelected(int newPosition) {
+            int currentPosition = mHistoryPosition;
+            List<Fragment> fragments = getSupportFragmentManager().getFragments();
+            //Fragment fragmentToShow = mPagerAdapter.getItem(newPosition);
+            //Fragment fragmentToHide = mPagerAdapter.getItem(currentPosition);
+            for (Fragment fragment: fragments) {
+                if (fragment instanceof ViewPagerFragment) {
+                    Log.d("Fragment ID",Integer.toString(fragment.getId()));
+                    ((ViewPagerFragment) fragment).pauseMedia();
+                    if (fragment.getTag() != null) {
+                        Log.d("Fragment Tag",fragment.getTag());
+                    }
+                }
+
+            }
+            mHistoryPosition = newPosition;
+        }
+
+        @Override
+        public void onPageScrolled(int arg0, float arg1, int arg2) { }
+
+        public void onPageScrollStateChanged(int arg0) { }
+    };
 
 }

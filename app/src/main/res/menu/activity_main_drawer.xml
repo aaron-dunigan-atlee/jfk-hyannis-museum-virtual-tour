@@ -8,22 +8,24 @@
             android:id="@+id/nav_camera"
             android:icon="@drawable/ic_menu_camera"
             android:title="@string/nav_scan_barcode" />
-        <item
-            android:id="@+id/nav_location"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="@string/nav_check_location" />
-
     </group>
     <item android:title="@string/nav_drawer_exhibits_subtitle"
         android:id="@+id/nav_exhibits_section">
         <menu>
-            <item
-                android:id="@+id/nav_intro"
-                android:icon="@drawable/ic_menu_slideshow"
-                android:title="@string/nav_intro_title"/>
             <!-- Items will be added at runtime -->
         </menu>
     </item>
-
-
+    <item android:title="@string/nav_drawer_visit_subtitle"
+        android:id="@+id/nav_visit_section">
+        <menu>
+            <item
+                android:id="@+id/visit_website"
+                android:icon="@drawable/ic_museum_black_24dp"
+                android:title="@string/nav_visit_website" />
+            <item
+                android:id="@+id/get_tickets"
+                android:icon="@drawable/ic_ticket_black_24dp"
+                android:title="@string/nav_get_tickets" />
+        </menu>
+    </item>
 </menu>

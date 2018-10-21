@@ -5,8 +5,9 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
 
-import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.Exhibit;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitResource;
+
+import java.util.Hashtable;
 
 /*
 A ViewModel to faciliate communication between parent (ViewPagerFragment)
@@ -21,14 +22,23 @@ https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
  */
 public class FragmentSharedViewModel extends ViewModel {
     private final static String LOG_TAG = "FragmentSharedViewModel";
-    private final MutableLiveData<ExhibitResource> resourceHolder = new MutableLiveData<ExhibitResource>();
-
-    public void setResource(ExhibitResource resource) {
+    /* This ViewModel will hold a LiveData that contains a Hashtable of
+     * <pieceId, resource> to indicate what ExhibitResource has been selected for each pieceId
+     * currently in the history.
+     */
+    private final MutableLiveData<Hashtable<Integer,ExhibitResource>> resourceHolder = new MutableLiveData<Hashtable<Integer,ExhibitResource>>();
+    public void setResource(int pieceId, ExhibitResource resource) {
         Log.d(LOG_TAG, "Setting resource.");
-        resourceHolder.setValue(resource);
+        Hashtable<Integer, ExhibitResource> exhibitResourceHashtable = resourceHolder.getValue();
+        if (exhibitResourceHashtable == null) { exhibitResourceHashtable = new Hashtable<Integer, ExhibitResource>(); }
+        if (exhibitResourceHashtable.containsKey(pieceId)) {
+            exhibitResourceHashtable.remove(pieceId);
+        }
+        exhibitResourceHashtable.put(pieceId, resource);
+        resourceHolder.setValue(exhibitResourceHashtable);
     }
 
-    public LiveData<ExhibitResource> getResource() {
+    public LiveData<Hashtable<Integer,ExhibitResource>> getResources() {
         Log.d(LOG_TAG, "Getting resource.");
         return resourceHolder;
     }

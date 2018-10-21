@@ -1,8 +1,8 @@
-[{"exhibit_title":"Welcome",
+[{"exhibit_title":"Welcome to JFK Hyannis Museum",
   "id":0,
   "exhibit_pieces":[
     {"id":0,
-      "title":"Welcome",
+      "title":"Welcome to JFK Hyannis Museum",
       "resources":[{
         "title":"Description",
         "resource_URL":"http://techslides.com/demos/samples/sample.mp3",
@@ -18,7 +18,7 @@
     "title":"Robert Kennedy Speaks",
     "resources":[{
       "title":"Description",
-      "resource_URL":"http://techslides.com/demos/samples/sample.mp3",
+      "resource_URL":"http://www.hochmuth.com/mp3/Boccherini_Concerto_478-1.mp3",
       "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
       "type":"audio"
     },
@@ -31,6 +31,11 @@
         "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfk1964dnc.mp3",
         "background_image_URL":"https://www.americanrhetoric.com/images/rfk1964.JPG",
         "type":"audio"
+      },
+      {"title":"RFK announced death of MLK",
+        "resource_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
+        "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
+        "type":"image"
       }]
   },
   {"id":2001,
@@ -45,7 +50,7 @@
   }
 ]},
   {"id":1,
-    "exhibit_title":"Centennial Exhibit",
+    "exhibit_title":"Creating Camelot",
     "exhibit_pieces":[
       {"id":1000,
         "title":"Robert Kennedy Speaks",

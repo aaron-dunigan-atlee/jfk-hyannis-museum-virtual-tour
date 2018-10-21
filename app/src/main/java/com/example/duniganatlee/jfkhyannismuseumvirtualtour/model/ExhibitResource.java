@@ -5,6 +5,9 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class ExhibitResource {
+    static public final String IMAGE = "image";
+    static public final String AUDIO = "audio";
+    static public final String VIDEO = "video";
 
     @SerializedName("title")
     @Expose

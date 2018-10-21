@@ -1,7 +1,10 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils;
 
+import android.app.Activity;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.R;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.Exhibit;
@@ -13,9 +16,11 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 public class JsonUtils {
     public static final String JSON_LOG_TAG = "JSON";
+
     // Method to load Json from local file asset.
     // Taken from https://stackoverflow.com/questions/19945411/android-java-how-can-i-parse-a-local-json-file-from-assets-folder-into-a-listvi/19945484#19945484
     public static String loadJSONFromAsset(Context context) {
@@ -33,6 +38,7 @@ public class JsonUtils {
         }
         return json;
     }
+
 
     /*
     Given the JSON exhibit list, extract each individual exhibit, assign it to an exhibit object,

@@ -66,4 +66,50 @@ public class ImageUtils {
         Frame frame = new Frame.Builder().setBitmap(image).build();
         return detector.detect(frame);
     }
+
+
+    public static Integer getBarcodeFromImage(Context context, String photoPath) {
+        SparseArray<Barcode> barcodes = ImageUtils.detectBarcodes(context, photoPath);
+        ImageUtils.deleteTemporaryImageFile(context, photoPath);
+        if (barcodes != null) {
+            // Check that there is exactly one barcode detected.
+            if (barcodes.size() == 1) {
+                Barcode barcode = barcodes.valueAt(0);
+                String barcodeContent = barcode.rawValue;
+                Log.d("Barcode found", barcodeContent);
+                return processBarcode(barcode);
+            } else if (barcodes.size() == 0) {
+                return null;
+            } else {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private static Integer processBarcode(Barcode barcode) {
+        // Check that the user has scanned a valid barcode for this app.
+        if (barcode.valueFormat != Barcode.TEXT) {
+            return null;
+        } else /* We have a text barcode */ {
+            String barcodeText = barcode.displayValue;
+            if (!barcodeText.startsWith("JFK Hyannis Museum")) {
+                return null;
+            } else /* We have a barcode meant for this app. */ {
+                String splitBarcodeText[] = barcodeText.split("\n");
+                try {
+                    // TODO: Remove exhibit ID from barcode format?
+                    int barcodeExhibitId = Integer.parseInt(splitBarcodeText[1]);
+                    int barcodePieceId = Integer.parseInt(splitBarcodeText[2]);
+                    Log.d("Barcode Exhibit",Integer.toString(barcodeExhibitId));
+                    Log.d("Barcode Piece",Integer.toString(barcodePieceId));
+                    return barcodePieceId;
+                } catch (IndexOutOfBoundsException ex) {
+                    Log.d("Barcode", "Bad barcode read.  Exhibit or piece ID not found.");
+                    return null;
+                }
+            }
+        }
+    }
+
 }

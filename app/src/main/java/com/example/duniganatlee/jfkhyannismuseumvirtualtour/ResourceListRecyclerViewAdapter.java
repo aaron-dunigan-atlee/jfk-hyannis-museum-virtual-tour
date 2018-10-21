@@ -38,16 +38,25 @@ public class ResourceListRecyclerViewAdapter extends RecyclerView.Adapter<Resour
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         ExhibitResource resource = mExhibitPiece.getResources().get(position);
         holder.mResource = resource;
-        // holder.mIconView.setDrawable...;
+        String resourceType = resource.getType();
+        int iconId;
+        switch (resourceType) {
+            case "video": iconId = R.drawable.ic_videocam_black_24dp; break;
+            case "audio": iconId = R.drawable.ic_volume_up_black_24dp; break;
+            case "image": iconId = R.drawable.ic_image_black_24dp; break;
+            default: iconId = R.drawable.ic_play_circle_filled_black_24dp;
+        }
+        holder.mIconView.setImageResource(iconId);
         holder.mContentView.setText(resource.getTitle());
         final FragmentSharedViewModel model = ViewModelProviders.of(mActivity).get(FragmentSharedViewModel.class);
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                model.setResource(holder.mResource);
+                // TODO: If re-click the same resource, don't reload.
+                model.setResource(mExhibitPiece.getId(), holder.mResource);
             }
         });
     }

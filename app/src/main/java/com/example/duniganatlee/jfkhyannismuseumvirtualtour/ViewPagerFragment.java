@@ -3,9 +3,7 @@ package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -20,6 +18,8 @@ import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.Exhibit;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitPiece;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitResource;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.JsonUtils;
+
+import java.util.Hashtable;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,9 +37,10 @@ public class ViewPagerFragment extends Fragment {
 
     private int mPieceId;
     private ExhibitPiece mPiece;
-    private int mExhibitId;
     private Context mContext;
     private FragmentActivity mHostActivity;
+    FragmentSharedViewModel fragmentSharedViewModel;
+    private Fragment mMediaFragment;
 
     @BindView(R.id.piece_description_text_view) TextView pieceDescriptionTextView;
 
@@ -72,18 +73,12 @@ public class ViewPagerFragment extends Fragment {
         } else {
             mPieceId = MainActivity.WELCOME_ID;
         }
-        FragmentSharedViewModel model = ViewModelProviders.of(mHostActivity).get(FragmentSharedViewModel.class);
-        model.getResource().observe(this, new Observer<ExhibitResource>() {
-            @Override
-            public void onChanged(@Nullable ExhibitResource resource) {
-                if (resource != null) {
-                    FragmentManager fragmentManager = getChildFragmentManager();
-                    MediaPlayerFragment mediaPlayerFragment = MediaPlayerFragment
-                            .newInstance(resource.getResourceURL(), resource.getBackgroundImageURL());
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.media_player_container, mediaPlayerFragment)
-                            .commit();
 
+        fragmentSharedViewModel.getResources().observe(this, new Observer<Hashtable<Integer,ExhibitResource>>() {
+            @Override
+            public void onChanged(@Nullable Hashtable<Integer,ExhibitResource> resourceTable) {
+                if (resourceTable != null) {
+                    setResource(resourceTable.get(mPieceId));
                 }
             }
         });
@@ -106,19 +101,48 @@ public class ViewPagerFragment extends Fragment {
         // TODO: Create helper functions in ExhibitPiece to get narration and background.
         Log.d("ViewPager", "Replacing fragments.");
         ExhibitResource resource = mPiece.getResources().get(0);
+        // Setting the resource in the sharedViewModel will trigger setResource() to load
+        // the media fragment.
+        fragmentSharedViewModel.setResource(mPieceId, resource);
         FragmentManager fragmentManager = getChildFragmentManager();
-        MediaPlayerFragment mediaPlayerFragment = MediaPlayerFragment
-                .newInstance(resource.getResourceURL(), resource.getBackgroundImageURL());
         ResourceListFragment resourceListFragment = ResourceListFragment.newInstance(mPiece);
         fragmentManager.beginTransaction()
                 .replace(R.id.resource_list_container,resourceListFragment)
-                .replace(R.id.media_player_container, mediaPlayerFragment)
                 .commit();
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        // Get the calling Activity as a FragmentActivity so we can reference its ViewModelProviders.
         mHostActivity = (FragmentActivity) context;
+        fragmentSharedViewModel = ViewModelProviders.of(mHostActivity).get(FragmentSharedViewModel.class);
     }
+
+    private void setResource(ExhibitResource resource) {
+        FragmentManager fragmentManager = getChildFragmentManager();
+        if (resource.getType().equals(ExhibitResource.IMAGE)) {
+            mMediaFragment = ImageFragment
+                    .newInstance(resource.getResourceURL(), resource.getTitle());
+        } else {
+            mMediaFragment = MediaPlayerFragment
+                    .newInstance(resource.getResourceURL(), resource.getBackgroundImageURL());
+        }
+        fragmentManager.beginTransaction()
+                .replace(R.id.media_player_container, mMediaFragment)
+                .commit();
+    }
+
+    public void pauseMedia() {
+        if (mMediaFragment instanceof MediaPlayerFragment) {
+            ((MediaPlayerFragment) mMediaFragment).pausePlayer();
+        }
+    }
+
+    public void resumeMedia() {
+        if (mMediaFragment instanceof MediaPlayerFragment) {
+            ((MediaPlayerFragment) mMediaFragment).resumePlayer();
+        }
+    }
+
 }

@@ -1,23 +1,17 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 
-import android.app.Activity;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
-import com.example.duniganatlee.jfkhyannismuseumvirtualtour.model.ExhibitResource;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -31,6 +25,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,6 +42,7 @@ public class MediaPlayerFragment extends Fragment {
     private static final String BACKGROUND_URL = "background_url";
     public static final String NO_MEDIA = "no_media";
     public static final String DEFAULT_BACKGROUND = "default_background";
+    public static final int DEFAULT_BACKGROUND_ID = R.drawable.jfklogo_bluebg_mobile;
     private static final boolean DEFAULT_AUTOPLAY = false;
     private static final int DEFAULT_WINDOW_INDEX = 0;
     private static final long DEFAULT_PLAYBACK_POSITION = 0;
@@ -64,6 +60,8 @@ public class MediaPlayerFragment extends Fragment {
 
     // Layout view variables to be bound using ButterKnife.
     @BindView(R.id.player_view) PlayerView mExoPlayerView;
+    @BindView(R.id.exo_artwork) ImageView mArtworkImageView;
+    @BindView(R.id.exo_shutter) View mExoShutterView;
 
     public MediaPlayerFragment() {
         // Required empty public constructor
@@ -150,18 +148,7 @@ public class MediaPlayerFragment extends Fragment {
     }
 
     private void playMedia(String mediaUrl, String backgroundUrl, boolean autoPlay, int windowIndex, long playbackPosition) {
-        if (backgroundUrl != null) {
-            if (backgroundUrl.equals(DEFAULT_BACKGROUND)) {
-                Log.d("intitalizePlayer","Setting default artwork.");
-                // TODO: Choose default artwork.
-                mExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource
-                        (getResources(), R.drawable.jfklogo_bluebg_mobile));
-            } else {
-                // TODO: Load background URL image and set it.
-                // might have to build a Picasso Target.  See https://square.github.io/picasso/2.x/picasso/com/squareup/picasso/Target.html
-                // https://www.codexpedia.com/android/android-download-and-save-image-through-picasso/
-            }
-        }
+
         Uri mediaUri = Uri.parse(mediaUrl);
         if (!mediaUrl.equals(NO_MEDIA)) {
             //Prepare media source.  See https://google.github.io/ExoPlayer/guide.html#preparing-the-player
@@ -172,6 +159,32 @@ public class MediaPlayerFragment extends Fragment {
             mExoPlayer.prepare(mediaSource);
             mExoPlayer.setPlayWhenReady(autoPlay);
             mExoPlayer.seekTo(windowIndex, playbackPosition);
+        }
+        // Taking advantage of the way if statements are processed with ||
+        // see https://stackoverflow.com/questions/1795808/and-and-or-in-if-statements
+        if (backgroundUrl == null || backgroundUrl.equals(DEFAULT_BACKGROUND)) {
+            Log.d("intitalizePlayer","Setting default artwork.");
+            mExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource
+                    (getResources(),DEFAULT_BACKGROUND_ID ));
+        } else {
+            //Log.d("mediaPlayer", "Attempting to load " + backgroundUrl);
+            /*Picasso.get()
+                    .load(backgroundUrl)
+                    .error(R.drawable.jfklogo_bluebg_mobile)
+                    .into(mArtworkImageView);
+                    */
+
+            mExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource
+                    (getResources(),DEFAULT_BACKGROUND_ID ));
+            /*
+            mArtworkImageView.setImageResource(R.drawable.jfk_logo);
+            mArtworkImageView.setVisibility(View.VISIBLE);
+            mExoShutterView.setAlpha(0);
+            */
+            // TODO: Load background from URL into exoPlayer.
+            // might have to build a Picasso Target.  See https://square.github.io/picasso/2.x/picasso/com/squareup/picasso/Target.html
+            // https://www.codexpedia.com/android/android-download-and-save-image-through-picasso/
+
         }
     }
 
@@ -190,4 +203,17 @@ public class MediaPlayerFragment extends Fragment {
         mExoPlayer.release();
         mExoPlayer = null;
     }
+
+    public void pausePlayer() {
+        if (mExoPlayer != null) {
+            mExoPlayer.setPlayWhenReady(false);
+        }
+    }
+
+    public void resumePlayer() {
+        if (mExoPlayer != null) {
+            mExoPlayer.setPlayWhenReady(true);
+        }
+    }
+
 }

@@ -17,6 +17,7 @@ import java.util.List;
 public class HistoryPagerAdapter extends FragmentStatePagerAdapter {
     private final static String LOG_TAG = "HistoryPagerAdapter";
     private List<HistoryEntry> mHistory;
+    private FragmentManager mFragmentManager;
     public HistoryPagerAdapter(FragmentManager fm, List<HistoryEntry> history, Exhibit[] exhibitList) {
         super(fm);
         mHistory = history;
@@ -34,7 +35,6 @@ public class HistoryPagerAdapter extends FragmentStatePagerAdapter {
     @Override
     public int getCount() {
         if (mHistory == null) return 0;
-        Log.d(LOG_TAG, "History size " + Integer.toString(mHistory.size()));
         return mHistory.size();
     }
 }
