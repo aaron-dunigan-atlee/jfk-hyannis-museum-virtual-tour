@@ -5,7 +5,12 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-// Thanks to http://www.jsonschema2pojo.org/ for making this easy.
+/* In the JFK Hyannis Museum, and "Exhibit" is an entire room dedicated to a theme.
+ * Within each Exhibit room are various "Pieces" (mostly photographs), which are modeled by
+ * the "ExhibitPiece" class.  Finally, our app provides various multimedia resources for each
+ * exhibit piece.  These multimedia resources are modeled by the "ExhibitResource" object.
+ * Thanks to http://www.jsonschema2pojo.org/ for making this easy.
+ */
 public class Exhibit {
     @SerializedName("id")
     @Expose

@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity
         setTitle(R.string.app_short_name);
         setSupportActionBar(toolbar);
 
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -269,7 +270,7 @@ public class MainActivity extends AppCompatActivity
     // which will in turn update the adapter on the ViewPagerFragment to show the
     // new piece in the UI.
     private void updateDatabase(int newPieceId) {
-        // This will cause the ViewPager to scroll to the new piece:
+        // This will cause the ViewPager to scroll to the new piece after we are done:
         mHistoryPosition = HISTORY_END;
         // We want to collect all entries to be updated in the db,
         // so we can make just one insertion/update operation; otherwise
@@ -388,9 +389,17 @@ public class MainActivity extends AppCompatActivity
                     mPagerAdapter = new HistoryPagerAdapter(getSupportFragmentManager(), mHistory, mExhibitsList);
                     viewPager.setAdapter(mPagerAdapter);
                     if (mHistoryPosition == HISTORY_END) {
-                        viewPager.setCurrentItem(mHistory.size() - 1);
+                        int historySize = mHistory.size();
+                        // First set the current item as the one previous to what we want,
+                        // so the user sees a smooth scroll in, of the new item.
+                        // This helps teach that swiping left/right moves through the history.
+                        // TODO: This doesn't seem to be working.
+                        if (historySize > 1) {
+                            viewPager.setCurrentItem(mHistory.size() - 2);
+                        }
+                        viewPager.setCurrentItem(mHistory.size() - 1, true);
                     } else {
-                        viewPager.setCurrentItem(mHistoryPosition);
+                        viewPager.setCurrentItem(mHistoryPosition, true);
                     }
 
                 }

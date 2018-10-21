@@ -20,9 +20,14 @@ import java.util.List;
  * to set the appropriate ExhibitResource in the MediaPlayerFragment.
  */
 public class ResourceListRecyclerViewAdapter extends RecyclerView.Adapter<ResourceListRecyclerViewAdapter.ViewHolder> {
-
+    // By default, load the resource at this position.
+    private static final int DEFAULT_RESOURCE = 0;
     private final ExhibitPiece mExhibitPiece;
     private final FragmentActivity mActivity;
+    // Keep track of the current selected resource so we don't reload on click.
+    // Assume we start with resource 0 (the exhibit piece's description).
+    // As described at https://stackoverflow.com/a/39139163/
+    private int mSelectedPosition = DEFAULT_RESOURCE;
 
     public ResourceListRecyclerViewAdapter(ExhibitPiece piece, FragmentActivity activity) {
         mExhibitPiece = piece;
@@ -50,15 +55,23 @@ public class ResourceListRecyclerViewAdapter extends RecyclerView.Adapter<Resour
             default: iconId = R.drawable.ic_play_circle_filled_black_24dp;
         }
         holder.mIconView.setImageResource(iconId);
+        holder.mIconView.setContentDescription(resourceType);
         holder.mContentView.setText(resource.getTitle());
         final FragmentSharedViewModel model = ViewModelProviders.of(mActivity).get(FragmentSharedViewModel.class);
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: If re-click the same resource, don't reload.
-                model.setResource(mExhibitPiece.getId(), holder.mResource);
+                int adapterPosition = holder.getAdapterPosition();
+                // If user re-clicks the currently viewed resource, don't reload.
+                if (adapterPosition != mSelectedPosition) {
+                    mSelectedPosition = adapterPosition;
+                    model.setResource(mExhibitPiece.getId(), holder.mResource);
+                }
             }
         });
+       if (holder.getAdapterPosition() == DEFAULT_RESOURCE) {
+           holder.mView.requestFocus();
+       }
     }
 
     @Override

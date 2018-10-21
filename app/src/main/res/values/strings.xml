@@ -24,7 +24,7 @@
     <string name="nav_intro_title">Welcome to JFK Hyannis Museum</string>
     <string name="invalid_barcode">Couldn\'t read that barcode.  Please scan again.</string>
     <string name="icon_description">icon</string>
-    <string name="appwidget_text">EXAMPLE</string>
+    <string name="appwidget_text">JFK Hyannis Museum</string>
     <string name="add_widget">Add widget</string>
     <string name="location_alert_title">Location Alert</string>
     <string name="location_alert_message">It appears that you are not currently at the JFK Hyannis Museum.  You will not be able to scan barcodes if you are not at the museum.  You can view your history from a previous visit for 30 days.  Would you like to visit the museum\'s website to order tickets?</string>
@@ -40,7 +40,5 @@
     <string name="long_resource_title">A really long resource title that might wrap over two or more lines.</string>
     <string name="json_url">https://jfkhyannismuseum.org/wp-content/mobile-app-data/exhibits.json</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="default_image_description">An image from the JFK Hyannis Museum.</string>
 </resources>

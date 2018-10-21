@@ -7,5 +7,8 @@
     android:layout_height="match_parent"
     android:id="@+id/view_pager"
     tools:context=".MainActivity"
-    tools:showIn="@layout/app_bar_main"/>
+    tools:showIn="@layout/app_bar_main"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    android:background="@color/colorPrimaryLight"
+    />
 

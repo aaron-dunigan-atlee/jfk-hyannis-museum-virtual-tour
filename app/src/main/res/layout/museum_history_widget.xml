@@ -20,8 +20,8 @@
         android:background="#09C"
         android:contentDescription="@string/appwidget_text"
         android:text="@string/appwidget_text"
-        android:textColor="#ffffff"
-        android:textSize="24sp"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/appwidget_nodata_text_size"
         android:textStyle="bold|italic" />
 
 </RelativeLayout>
