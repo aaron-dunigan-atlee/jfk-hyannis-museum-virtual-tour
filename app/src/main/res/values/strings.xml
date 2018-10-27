@@ -48,4 +48,7 @@
     <string name="no_wireless_settings">Unable to open wireless settings</string>
     <string name="quit_no_network_alert">Quit</string>
     <string name="try_again_no_network_alert">Try again</string>
+    <string name="check_again_location_alert">Check location again</string>
+    <string name="no_json_message">Could not retrieve exhibit record.  Using default version.</string>
+    <string name="invalid_history_entry_message">Something went wrong.</string>
 </resources>

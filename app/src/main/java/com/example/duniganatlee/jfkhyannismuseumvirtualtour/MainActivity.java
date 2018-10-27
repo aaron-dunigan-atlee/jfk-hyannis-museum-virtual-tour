@@ -43,6 +43,7 @@ import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.JsonUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.alert_dialogs.LocationAlertDialog;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.LocationUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.NetworkUtils;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.PreferenceUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.widget.MuseumHistoryWidgetProvider;
 
 import java.io.File;
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity
     private static final String LOCATION_FRAGMENT_TAG = "location";
     private static final String NO_NETWORK_FRAGMENT_TAG = "no_network";
     private static final String NO_NETWORK_WARNING = "Network is not available.";
+    private static final String LOG_TAG = "Main Activity";
 
     // Path for a temporary photo taken when user scans a barcode.
     private String mTempPhotoPath;
@@ -105,6 +107,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        // Check whether user is at the JFK Hyannis Museum.
+        // If so, LocationUtils.userIsAtMuseum will be set to true.
         LocationUtils.checkLocation(this);
 
         // Get instance of viewing history database.
@@ -131,6 +135,7 @@ public class MainActivity extends AppCompatActivity
 
 
         /* Use an AsyncTask to load the JSON file from the web. */
+        // TODO: Maybe move this to after the checkForNetwork() in onResume()
         if (NetworkUtils.deviceIsConnected(this)) {
             String jsonUrlString = getString(R.string.json_url);
             URL jsonUrl = NetworkUtils.buildUrl(jsonUrlString);
@@ -263,22 +268,21 @@ public class MainActivity extends AppCompatActivity
     // Make sure current piece is valid.
     // TODO: Do we really need this?
     // This is called from the ViewModel observer's onChange() method.
-    private void checkPieceIsValid(int pieceId) {
+    private boolean pieceIsValid(int pieceId) {
         // Exhibit ID is encoded in piece ID:
         int exhibitId = Exhibit.getExhibitId(pieceId);
         Exhibit exhibit = Exhibit.getExhibitById(mExhibitsList, exhibitId);
         if (exhibit == null) {
-            // TODO: Handle this error case.
-            Log.e(PIECE_ID, "exhibitId did not correspond to any known Exhibit");
-            return;
+            Log.e(PIECE_ID, "exhibitId " + exhibitId + " does not correspond to any known Exhibit");
+            return false;
         }
         ExhibitPiece piece = exhibit.getPieceById(pieceId);
         if (piece == null) {
-            // TODO: Handle this error case.
-            Log.e(PIECE_ID, "pieceId did not correspond to any known ExhibitPiece");
-            return;
+            Log.e(PIECE_ID, "pieceId " + pieceId + " did not correspond to any known ExhibitPiece");
+            return false;
         }
-        Log.d(PIECE_ID, "Piece ID is valid.");
+        // Piece is valid.
+        return true;
     }
 
     // This method updates the database when a new piece is viewed.
@@ -387,12 +391,19 @@ public class MainActivity extends AppCompatActivity
                     });
                 } else {
                     // Set current piece info (mPieceId, mExhibitId, mPiece).
+                    HistoryEntry entry;
                     if (mHistoryPosition == HISTORY_END) {
-                        checkPieceIsValid(HistoryUtils.getFinalEntry(mHistory)
-                                .getPieceId());
+                        entry = HistoryUtils.getFinalEntry(mHistory);
                     } else {
-                        checkPieceIsValid(HistoryUtils.getEntryByPosition(mHistory, mHistoryPosition)
-                                .getPieceId());
+                        entry = HistoryUtils.getEntryByPosition(mHistory, mHistoryPosition);
+                    }
+                    if (entry == null || !pieceIsValid(entry.getPieceId())) {
+                        // Something is wrong.  Fail gracefully.
+                        Log.e(LOG_TAG, "Null entry or invalid piece id.");
+                        Toast.makeText(getApplicationContext(),
+                                R.string.invalid_history_entry_message,
+                                Toast.LENGTH_LONG).show();
+                        return;
                     }
 
                     // Inform widget that data set has changed so it can update listview.
@@ -408,7 +419,7 @@ public class MainActivity extends AppCompatActivity
                         int historySize = mHistory.size();
                         // First set the current item as the one previous to what we want,
                         // so the user sees a smooth scroll in, of the new item.
-                        // This helps teach that swiping left/right moves through the history.
+                        // This helps teach the user that swiping left/right moves through the history.
                         // TODO: This doesn't seem to be working.
                         if (historySize > 1) {
                             viewPager.setCurrentItem(mHistory.size() - 2);
@@ -432,6 +443,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLocationDialogPositiveClick(DialogFragment dialog) {
         launchTicketPurchase();
+    }
+
+    public void onLocationDialogNeutralClick(DialogFragment dialog) {
+        LocationUtils.checkLocation(this);
     }
 
     @Override
@@ -500,14 +515,21 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String exhibitsJson) {
             super.onPostExecute(exhibitsJson);
-            if (exhibitsJson != null) {
-                mExhibitsList = JsonUtils.parseExhibitList(exhibitsJson);
-                // TODO: Store json locally.
-
-            } else {
-                // TODO: Load json from local copy if it exitsts.
-                // If not, fail gracefully.
+            if (exhibitsJson == null) {
+                // If we couldn't get a remote copy, check for a locally saved copy.
+                exhibitsJson = PreferenceUtils.getPreferenceExhibitsJson(getApplicationContext());
+                if (exhibitsJson == null) {
+                    Log.e(LOG_TAG, "JSON fetch failed.");
+                    Toast.makeText(getApplicationContext(), R.string.no_json_message, Toast.LENGTH_LONG).show();
+                    // App will be packaged with a JSON asset, but changes to the JSON
+                    // after app release will be posted on the museum web site,
+                    // so the local asset is used only as a last resort:
+                    exhibitsJson = JsonUtils.loadJSONFromAsset(getApplicationContext());
+                }
             }
+
+            // Parse the json.
+            mExhibitsList = JsonUtils.parseExhibitList(exhibitsJson);
 
             // Add exhibit titles to navigation drawer menu.
             // https://freakycoder.com/android-notes-53-how-to-create-menu-item-for-navigationdrawer-programmatically-67ddfa8027bc

@@ -20,6 +20,7 @@ public class LocationAlertDialog extends DialogFragment {
      * Each method passes the DialogFragment in case the host needs to query it. */
     public interface LocationAlertListener {
         public void onLocationDialogPositiveClick(DialogFragment dialog);
+        public void onLocationDialogNeutralClick(DialogFragment dialog);
     }
 
     // Use this instance of the interface to deliver action events
@@ -43,6 +44,14 @@ public class LocationAlertDialog extends DialogFragment {
                 mListener.onLocationDialogPositiveClick(LocationAlertDialog.this);
             }
         });
+
+        builder.setNeutralButton(R.string.check_again_location_alert, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mListener.onLocationDialogNeutralClick(LocationAlertDialog.this);
+            }
+        });
+
         return builder.create();
 
     }
