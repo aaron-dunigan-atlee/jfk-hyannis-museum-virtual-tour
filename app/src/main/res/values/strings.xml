@@ -41,4 +41,11 @@
     <string name="json_url">https://jfkhyannismuseum.org/wp-content/mobile-app-data/exhibits.json</string>
 
     <string name="default_image_description">An image from the JFK Hyannis Museum.</string>
+    <string name="no_network_alert_title">Internet not available</string>
+    <string name="no_network_alert_message">You will need an Internet connection to use this app. Check that you are not in airplane mode. If you are at the JFK Hyannis Museum, the staff can help you connect to the museum\'s public wifi.  Would you like to view your wireless network settings?</string>
+    <string name="settings_no_network_alert">View settings</string>
+    <string name="no_web_browser">No web browser found to open that web page.</string>
+    <string name="no_wireless_settings">Unable to open wireless settings</string>
+    <string name="quit_no_network_alert">Quit</string>
+    <string name="try_again_no_network_alert">Try again</string>
 </resources>

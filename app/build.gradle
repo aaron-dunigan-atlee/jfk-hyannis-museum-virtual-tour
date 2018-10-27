@@ -39,8 +39,8 @@ dependencies {
     annotationProcessor "android.arch.persistence.room:compiler:$room_version"
     implementation 'com.google.android.exoplayer:exoplayer-core:2.8.4'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.8.4'
-    implementation 'com.google.android.gms:play-services-vision:15.0.2'
-    implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation 'com.google.android.gms:play-services-vision:17.0.2'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'

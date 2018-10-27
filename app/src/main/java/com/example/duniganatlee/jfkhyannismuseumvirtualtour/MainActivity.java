@@ -1,7 +1,7 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 
-import android.app.Activity;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.v4.app.DialogFragment;
 import android.appwidget.AppWidgetManager;
 import android.arch.lifecycle.Observer;
@@ -30,6 +30,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.alert_dialogs.NoNetworkAlertDialog;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.AppDatabase;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.ExhibitHistoryViewModel;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.database.HistoryEntry;
@@ -39,7 +40,7 @@ import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.AppExecutors;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.HistoryUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.ImageUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.JsonUtils;
-import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.LocationAlertDialog;
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.alert_dialogs.LocationAlertDialog;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.LocationUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.NetworkUtils;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.widget.MuseumHistoryWidgetProvider;
@@ -56,7 +57,8 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-                    LocationAlertDialog.LocationAlertListener {
+                    LocationAlertDialog.LocationAlertListener,
+                    NoNetworkAlertDialog.NoNetworkAlertListener {
 
     // Request code for launching camera app
     private static final int REQUEST_CAMERA_IMAGE = 1;
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity
     public static final int WELCOME_ID = 0;
     private static final int HISTORY_END = -1;
     private static final String LOCATION_FRAGMENT_TAG = "location";
+    private static final String NO_NETWORK_FRAGMENT_TAG = "no_network";
     private static final String NO_NETWORK_WARNING = "Network is not available.";
 
     // Path for a temporary photo taken when user scans a barcode.
@@ -140,6 +143,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        checkForNetwork();
+    }
+
+    private void checkForNetwork() {
+        if (!NetworkUtils.deviceIsConnected(this)) {
+            DialogFragment noNetworkAlertDialog = new NoNetworkAlertDialog();
+            noNetworkAlertDialog.show(getSupportFragmentManager(), NO_NETWORK_FRAGMENT_TAG);
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -189,8 +205,8 @@ public class MainActivity extends AppCompatActivity
     // Basic process taken from https://developer.android.com/training/camera/photobasics
     // Also modeled after the Emojify app
     private void getImageFromCamera() {
-        // if (!LocationUtils.userIsAtMuseum) {
-        if (false) {
+        if (!LocationUtils.userIsAtMuseum) {
+        // if (false) {
             DialogFragment locationAlertDialog = new LocationAlertDialog();
             locationAlertDialog.show(getSupportFragmentManager(), LOCATION_FRAGMENT_TAG);
             return;
@@ -414,8 +430,33 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
+    public void onLocationDialogPositiveClick(DialogFragment dialog) {
         launchTicketPurchase();
+    }
+
+    @Override
+    public void onNoNetworkDialogSettingsClick(DialogFragment dialog) {
+        launchWirelessSettings();
+    }
+
+    @Override
+    public void onNoNetworkDialogQuitClick(DialogFragment dialog) {
+        finish();
+    }
+
+    @Override
+    public void onNoNetworkDialogTryAgainClick(DialogFragment dialog) {
+        checkForNetwork();
+    }
+
+    private void launchWirelessSettings() {
+        // TODO: Should this be Settings.ACTION_WIFI_SETTINGS?  What's the difference?
+        Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Toast.makeText(this,getString(R.string.no_wireless_settings),Toast.LENGTH_LONG).show();
+        }
     }
 
     private void launchTicketPurchase() {
@@ -423,7 +464,13 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
+        } else {
+            notifyNoWebBrowser();
         }
+    }
+
+    private void notifyNoWebBrowser() {
+        Toast.makeText(this,getString(R.string.no_web_browser),Toast.LENGTH_LONG).show();
     }
 
     private void visitWebsite() {
@@ -431,6 +478,9 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
+        }
+        else {
+            notifyNoWebBrowser();
         }
     }
 

@@ -79,11 +79,14 @@ public class ImageUtils {
                 Log.d("Barcode found", barcodeContent);
                 return processBarcode(barcode);
             } else if (barcodes.size() == 0) {
+                Log.d("Barcode","No barcodes in image.");
                 return null;
             } else {
+                Log.d("Barcode","Multiple barcodes in image.");
                 return null;
             }
         }
+        Log.d("Barcode","barcodes was null");
         return null;
     }
 
