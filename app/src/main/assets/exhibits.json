@@ -5,78 +5,166 @@
       "title":"Welcome to JFK Hyannis Museum",
       "resources":[{
         "title":"Description",
-        "resource_URL":"https://ia802508.us.archive.org/5/items/testmp3testfile/mpthreetest.mp3",
-        "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
-        "type":"audio",
-        "text":"Welcome to JFK Hyannis Museum.  Enjoy the tour."
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/jfklogo.gif",
+        "background_image_URL":"",
+        "type":"image",
+        "text":"Welcome to JFK Hyannis Museum.  Enjoy the enhanced tour. Click the camera icon to scan a barcode you find in the museum.  This will load additional multimedia content to accompany the exhibit.  Swipe left and right to review the exhibits you have already viewed."
       }]
     }]},
   {"exhibit_title":"RFK: Ripple of Hope",
-  "id":2,
+  "id":1,
   "exhibit_pieces":[
-  {"id":2000,
-    "title":"Robert Kennedy Speaks",
+  {"id":1000,
+    "title":"Robert F. Kennedy: Ripple of Hope",
     "resources":[{
-      "title":"Description",
-      "resource_URL":"http://www.hochmuth.com/mp3/Boccherini_Concerto_478-1.mp3",
-      "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
-      "type":"audio"
+      "title":"RFK: Ripple of Hope",
+      "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_poster.jpg",
+      "background_image_URL":"",
+      "type":"image",
+      "text":"The John F. Kennedy Hyannis Museum is pleased to announce the opening of a special exhibit to commemorate the life and legacy of Robert F. Kennedy.\nThe “RFK: Ripple of Hope” exhibit, assembled in collaboration with RFK Human Rights Foundation,  will be on display through 2019.\n“The theme ‘Ripple of Hope’ comes from his most famous and powerful speech delivered in Cape Town, South Africa,” said JFK Hyannis Museum curator Rebecca Pierce-Merrick. \"It's a fitting title for our exhibit as well because that's exactly what his life of public service created – a ripple of hope that continues to reverberate through the generations since his passing.\""
+    }]
+  },
+  {"id":1001,
+    "title":"Early Years",
+    "resources":[{
+      "title":"Early Years",
+      "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_01.mp3",
+      "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_01.jpg",
+      "type":"audio",
+      "text":"Early Years"
     },
-      {"title":"Remarks on the Death of Martin Luther King",
-      "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfkonmlkdeath45454.mp3",
-      "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
-      "type":"audio"
-     },
-      {"title":"Tribute to JFK at 1964 DNC",
-        "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfk1964dnc.mp3",
-        "background_image_URL":"https://www.americanrhetoric.com/images/rfk1964.JPG",
-        "type":"audio"
+      {
+        "title":"Childhood",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_03.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_03.jpg",
+        "type":"audio",
+        "text":"Robert Francis Kennedy was born on November 20, 1925, in Brookline, Massachusetts, the seventh child in the closely-knit and competitive family of Rose and Joseph P. Kennedy."
+      },{
+        "title":"\"...when you come from that far down...\"",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_04.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_04.jpg",
+        "type":"audio",
+        "text":"\"I was the seventh of nine children and when you come from that far down you have to struggle to survive.\""
+      },{
+        "title":"Education",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_05.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_05.jpg",
+        "type":"audio",
+        "text":"He attended Milton Academy and, after wartime service in the Navy from 1944-1946, received his degree in government from Harvard University. He earned his law degree from the University of Virginia Law School."
+      },{
+        "title":"Marriage and family",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_07.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_07.jpg",
+        "type":"audio",
+        "text":"On June 17, 1950 Robert Kennedy married Ethel Skakel. They had eleven children: Kathleen, Joseph, Robert, Jr., David, Courtney, Michael, Kerry, Christopher, Max, Doug and Rory."
+      },{
+        "title":"Hyannis Port summers",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_08.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_08.jpg",
+        "type":"audio",
+        "text":"Bobby and his family loved Hyannis Port summers. Each visit to their Kennedy Compound home was full of good times with brothers, sisters, cousins and friends."
       },
-      {"title":"RFK announced death of MLK",
-        "resource_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
-        "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
-        "type":"image"
+      {
+        "title":"Bobby and Jack",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_09.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1001_09.jpg",
+        "type":"audio",
+        "text":"It also gave Bobby and Jack precious time together away from the pressure of Washington."
       }]
   },
-  {"id":2001,
-    "title":"Exhibit Piece 2",
-    "description":"And now we move on to exhibit piece 2 which will show how Robert Kennedy ...",
-    "narrationURL":"https://sampleswap.org/samples-ghost/VOCALS%20and%20SPOKEN%20WORD/NASA%20Space%20Shuttle%20Communications/753[kb]NASA-ready-for-the-maneuver-copy.wav.mp3",
-    "resources":[{
-      "title":"Video about RFK Asassination",
-      "resource_URL":"https://archive.org/download/RfkAssassination/RfkAssassination1.mp4",
-      "type":"video"
-    }]
-  }
-]},
-  {"id":1,
-    "exhibit_title":"Creating Camelot",
-    "exhibit_pieces":[
-      {"id":1000,
-        "title":"Robert Kennedy Speaks",
-        "description":"Here is a description of the first exhibit piece.  Notice that in the photograph, ...",
-        "narrationURL":"http://techslides.com/demos/samples/sample.mp3",
-        "resources":[{
-          "title":"Remarks on the Death of Martin Luther King",
-          "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfkonmlkdeath45454.mp3",
-          "background_image_URL":"https://www.americanrhetoric.com/images/rfkannouncesmlkdeath.JPG",
-          "type":"audio"
-        },
-          {"title":"Tribute to JFK at 1964 DNC",
-            "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfk1964dnc.mp3",
-            "background_image_URL":"https://www.americanrhetoric.com/images/rfk1964.JPG",
-            "type":"audio"
-          }]
+    {"id":1002,
+      "title":"U.S. Attorney General Robert F. Kennedy",
+      "resources":[{
+        "title":"U.S. Attorney General Robert F. Kennedy",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_01.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_01.jpg",
+        "type":"audio",
+        "text":"U.S. Attorney General Robert F. Kennedy"
       },
-      {"id":1001,
-        "title":"Exhibit Piece 2",
-        "description":"And now we move on to exhibit piece 2 which will show how Robert Kennedy ...",
-        "narrationURL":"https://sampleswap.org/samples-ghost/VOCALS%20and%20SPOKEN%20WORD/NASA%20Space%20Shuttle%20Communications/753[kb]NASA-ready-for-the-maneuver-copy.wav.mp3",
-        "resources":[{
-          "title":"Video about RFK Asassination",
-          "resource_URL":"https://archive.org/download/RfkAssassination/RfkAssassination1.mp4",
-          "type":"video"
+        {
+          "title":"New energy",
+          "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_02.mp3",
+          "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_02.jpg",
+          "type":"audio",
+          "text":"President Kennedy appointed his brother Robert F. Kennedy Attorney General of the United States."
+        },
+        {
+          "title":"Jack's confidante",
+          "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_03.mp3",
+          "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_03.jpg",
+          "type":"audio",
+          "text":"Bobby brought new ideas and new energy to investigating and prosecuting organized crime, labor union corruption and corporate monopolies. Fiercely loyal to his brother Jack, Bobby was his ever-present confidante."
+        },
+        {
+          "title":"Kennedy visited the underserved",
+          "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_04.mp3",
+          "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_04.jpg",
+          "type":"audio",
+          "text":"His influence extended into foreign affairs and national security. And it was in this role that Robert F. Kennedy visited the underserved from Harlem to New Orleans learning about the poverty and social problems of America."
         }]
-      }
-    ]}
+    },
+    {"id":1003,
+      "title":"U.S. Senator Robert F. Kennedy",
+      "resources":[{
+        "title":"U.S. Senator Robert F. Kennedy",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1003_02.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1003_02.jpg",
+        "type":"audio",
+        "text":"Soon after President Kennedy's death, Robert Kennedy resigned as Attorney General, and in 1964 ran successfully for the United States Senate from New York. He was sworn in on January 4, 1965. As Senator, he initiated a number of programs in an effort to help the dispossessed and powerless in America."
+      },
+        {
+          "title":"Commitment to human rights",
+          "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1003_03.mp3",
+          "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1003_03.jpg",
+          "type":"audio",
+          "text":"While visiting urban ghettos, Appalachia, the Mississippi Delta, Native American reservations, and migrant workers' camps, Bobby was deeply affected by the shocking conditions and the plight of the children. He sought to raise the consciousness of the American people about poverty, and supported legislation to address these acute problems.\nRobert Kennedy was also deeply committed to the advancement of human rights abroad. From Eastern Europe to Latin America to South Africa, he inspired thousands with his powerful message of freedom and democracy. Kennedy was also absorbed during his Senate years by a quest to end the war in Vietnam."
+        },
+        {
+          "title":"\"We can do better.\"",
+          "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1003_04.mp3",
+          "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1003_04.jpg",
+          "type":"audio",
+          "text":"In all matters in his Senate career, Robert F. Kennedy stood for civil rights and social justice. As he often said with passion and hope: \"we can do better.\""
+        }]
+    },
+    {"id":1004,
+      "title":"The Assassination of Martin Luther King, Jr.",
+      "resources":[{
+        "title":"The assassination of Martin Luther King, Jr.",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1004_01.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1004_01.jpg",
+        "type":"audio",
+        "text":"The assassination of Martin Luther King, Jr.\nOn April 4, 1968, newly declared presidential candidate, Robert F. Kennedy, stood before a huge crowd in a poor, predominantly black neighborhood in Indianapolis, Indiana. There he shared the devastating news to the unknowing public."
+        },{
+        "title":"Kennedy announces King's death",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfkonmlkdeath.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1004_01.jpg",
+        "type":"audio",
+        "text":"\"I have some very sad news for all of you, and, I think sad news for all our fellow citizens, and people who love peace all over the world, and that is that Martin Luther King was shot and killed tonight in Memphis, Tennessee.\""
+        },{
+        "title":"No riots in Indianapolis",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1004_03.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1004_01.jpg",
+        "type":"audio",
+        "text":"Without notes, he spoke from the heart, urging the crowd not to seek revenge but to follow the non-violent principles of Dr. Martin Luther King.\nOn that awful night, riots broke out in 100 cities across the United States. There was no rioting in Indianapolis."
+        },{
+        "title":"Kennedy's speech in Indianapolis",
+        "resource_URL":"https://www.americanrhetoric.com/mp3clips/politicalspeeches/rfkonmlkdeath45454.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1004_01.jpg",
+        "type":"audio",
+        "text":"Robert Kennedy's remarks in Indianapolis announcing the death of Martin Luther King, Jr."
+        }
+      ]
+    },
+    {"id":1005,
+      "title":"Ripple of Hope",
+      "resources":[{
+        "title":"Ripple of hope",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1005_01.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1005_01.jpg",
+        "type":"audio",
+        "text":"On June 4, 1966 Bobby and Ethel Kennedy arrived in Johannesburg, South Africa for a six-day trip that would prove to change the lives of many whom Kennedy encountered.\nOn June 6th at the University of Cape Town, he delivered an impassioned speech against the regime of Apartheid. Sixteen hundred students, and thousands of others outside in the cold, listened as he denounced the subjugation of South Africa's black citizens and promoted democracy and civil rights. That famous speech became known as \"Ripple of Hope.\""
+      }]
+    }
+]}
   ]
