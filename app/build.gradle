@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'jfkhyannismuseum'
             keyPassword 'password'
-            storeFile file('D:/udacity/android_phase2/6Capstone/JFKHyannisMuseumVirtualTour/keystore.jks')
+            storeFile file("$rootDir/keystore.jks")
             storePassword 'password'
         }
     }

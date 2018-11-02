@@ -49,7 +49,7 @@ public class MediaPlayerFragment extends Fragment {
     public static final String NO_MEDIA = "no_media";
     public static final String DEFAULT_BACKGROUND = "default_background";
     public static final int DEFAULT_BACKGROUND_ID = R.drawable.jfklogo_bluebg_mobile;
-    private static final boolean DEFAULT_AUTOPLAY = true;
+    private static final boolean DEFAULT_AUTOPLAY = false;
     private static final int DEFAULT_WINDOW_INDEX = 0;
     private static final long DEFAULT_PLAYBACK_POSITION = 0;
 
