@@ -1,6 +1,7 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,11 +17,14 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
@@ -30,6 +34,8 @@ import com.squareup.picasso.Picasso;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils.ImageUtils.picassoImageTarget;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,13 +43,13 @@ import butterknife.ButterKnife;
  * create an instance of this fragment.
  */
 public class MediaPlayerFragment extends Fragment {
-
+    private static final String LOG_TAG = "MediaPlayerFragment";
     private static final String MEDIA_URL = "media_url";
     private static final String BACKGROUND_URL = "background_url";
     public static final String NO_MEDIA = "no_media";
     public static final String DEFAULT_BACKGROUND = "default_background";
     public static final int DEFAULT_BACKGROUND_ID = R.drawable.jfklogo_bluebg_mobile;
-    private static final boolean DEFAULT_AUTOPLAY = false;
+    private static final boolean DEFAULT_AUTOPLAY = true;
     private static final int DEFAULT_WINDOW_INDEX = 0;
     private static final long DEFAULT_PLAYBACK_POSITION = 0;
 
@@ -163,28 +169,15 @@ public class MediaPlayerFragment extends Fragment {
         // Taking advantage of the way if statements are processed with ||
         // see https://stackoverflow.com/questions/1795808/and-and-or-in-if-statements
         if (backgroundUrl == null || backgroundUrl.equals(DEFAULT_BACKGROUND)) {
+            // Use default background.
             Log.d("intitalizePlayer","Setting default artwork.");
             mExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource
                     (getResources(),DEFAULT_BACKGROUND_ID ));
         } else {
-            //Log.d("mediaPlayer", "Attempting to load " + backgroundUrl);
-            /*Picasso.get()
-                    .load(backgroundUrl)
-                    .error(R.drawable.jfklogo_bluebg_mobile)
-                    .into(mArtworkImageView);
-                    */
-
-            mExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource
-                    (getResources(),DEFAULT_BACKGROUND_ID ));
-            /*
-            mArtworkImageView.setImageResource(R.drawable.jfk_logo);
-            mArtworkImageView.setVisibility(View.VISIBLE);
-            mExoShutterView.setAlpha(0);
-            */
-            // TODO: Load background from URL into exoPlayer.
-            // might have to build a Picasso Target.  See https://square.github.io/picasso/2.x/picasso/com/squareup/picasso/Target.html
-            // https://www.codexpedia.com/android/android-download-and-save-image-through-picasso/
-
+            // Use specified background.  Load it with Picasso then set it to
+            // the PlayerView using a Picasso Target.
+            Log.d("mediaPlayer", "Attempting to load background artwork from " + backgroundUrl);
+            Picasso.get().load(backgroundUrl).into(picassoImageTarget(this));
         }
     }
 
@@ -213,6 +206,12 @@ public class MediaPlayerFragment extends Fragment {
     public void resumePlayer() {
         if (mExoPlayer != null) {
             mExoPlayer.setPlayWhenReady(true);
+        }
+    }
+
+    public void setPlayerViewDefaultArtwork(Bitmap artwork) {
+        if (mExoPlayerView != null) {
+            mExoPlayerView.setDefaultArtwork(artwork);
         }
     }
 

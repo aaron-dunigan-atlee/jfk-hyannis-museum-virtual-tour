@@ -4,7 +4,7 @@
     {"id":0,
       "title":"Welcome to JFK Hyannis Museum",
       "resources":[{
-        "title":"Description",
+        "title":"Welcome",
         "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/jfklogo.gif",
         "background_image_URL":"",
         "type":"image",
@@ -82,14 +82,14 @@
         "text":"U.S. Attorney General Robert F. Kennedy"
       },
         {
-          "title":"New energy",
+          "title":"Appointment as Attorney General",
           "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_02.mp3",
           "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_02.jpg",
           "type":"audio",
           "text":"President Kennedy appointed his brother Robert F. Kennedy Attorney General of the United States."
         },
         {
-          "title":"Jack's confidante",
+          "title":"New energy",
           "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_03.mp3",
           "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1002_03.jpg",
           "type":"audio",

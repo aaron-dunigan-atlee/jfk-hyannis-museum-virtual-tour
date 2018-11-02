@@ -3,15 +3,19 @@ package com.example.duniganatlee.jfkhyannismuseumvirtualtour.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
+import com.example.duniganatlee.jfkhyannismuseumvirtualtour.MediaPlayerFragment;
 import com.example.duniganatlee.jfkhyannismuseumvirtualtour.R;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.io.IOException;
@@ -113,6 +117,28 @@ public class ImageUtils {
                 }
             }
         }
+    }
+    /* A custom Picasso Target so that we can download an image to be set as
+     * the ExoPlayer's default artwork.  Based on
+     * https://www.codexpedia.com/android/android-download-and-save-image-through-picasso/
+     * Also see https://square.github.io/picasso/2.x/picasso/com/squareup/picasso/Target.html
+     */
+    public static Target picassoImageTarget(final MediaPlayerFragment playerFragment) {
+        return new Target() {
+            @Override
+            public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
+                playerFragment.setPlayerViewDefaultArtwork(bitmap);
+            }
+
+            @Override
+            public void onBitmapFailed(Exception exception, Drawable errorDrawable) {
+                exception.printStackTrace();
+            }
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                if (placeHolderDrawable != null) {}
+            }
+        };
     }
 
 }
