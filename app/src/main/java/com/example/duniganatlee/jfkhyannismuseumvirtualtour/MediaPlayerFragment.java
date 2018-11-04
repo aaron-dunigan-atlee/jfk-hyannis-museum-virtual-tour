@@ -81,7 +81,6 @@ public class MediaPlayerFragment extends Fragment {
      * @param backgroundURL URL of background image to display.
      * @return A new instance of fragment MediaPlayerFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static MediaPlayerFragment newInstance(String mediaUrl, String backgroundURL) {
         MediaPlayerFragment fragment = new MediaPlayerFragment();
         Bundle args = new Bundle();

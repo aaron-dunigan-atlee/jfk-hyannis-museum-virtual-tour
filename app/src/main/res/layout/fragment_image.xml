@@ -10,6 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitCenter"
-        tools:src="@drawable/jfklogo_bluebg_mobile" />
+        tools:src="@drawable/jfklogo_bluebg_mobile"
+        android:contentDescription="@null"/>
+    <!--contentDescription will be set at runtime as each new image is loaded-->
 
 </FrameLayout>

@@ -1,5 +1,6 @@
 package com.example.duniganatlee.jfkhyannismuseumvirtualtour;
 
+import android.app.ActivityOptions;
 import android.os.AsyncTask;
 import android.provider.Settings;
 import android.support.v4.app.DialogFragment;
@@ -73,6 +74,8 @@ public class MainActivity extends AppCompatActivity
     private static final String NO_NETWORK_FRAGMENT_TAG = "no_network";
     private static final String NO_NETWORK_WARNING = "Network is not available.";
     private static final String LOG_TAG = "Main Activity";
+    private static final String TEMP_PHOTO_PATH = "temp_photo_path";
+    private static final String EXHIBITS_JSON = "exhibits_json";
 
     // Path for a temporary photo taken when user scans a barcode.
     private String mTempPhotoPath;
@@ -82,10 +85,11 @@ public class MainActivity extends AppCompatActivity
     private List<HistoryEntry> mHistory = new ArrayList<>();
     HistoryPagerAdapter mPagerAdapter;
     private int mHistoryPosition;
+    private String mExhibitsJson;
 
     // Views for ButterKnife binding.
     @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.fab) FloatingActionButton fab;
+    @BindView(R.id.fab_camera) FloatingActionButton fab;
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
     @BindView(R.id.nav_view) NavigationView navigationView;
     @BindView(R.id.view_pager) ViewPager viewPager;
@@ -93,6 +97,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(LOG_TAG, "Creating Main Activity...");
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         viewPager.addOnPageChangeListener(pageChangeListener);
@@ -114,18 +119,6 @@ public class MainActivity extends AppCompatActivity
         // Get instance of viewing history database.
         mHistoryDb = AppDatabase.getInstance(getApplication());
 
-        // Find out which position in the history we'd like to view.
-        // This could come from the savedInstanceState
-        // or from Intent extras (when launched by the MuseumHistoryWidgetProvider).
-        // If none of the above, view the end of the history stack (last piece viewed).
-        Intent sendingIntent = getIntent();
-        if (sendingIntent != null) {
-            mHistoryPosition = sendingIntent.getIntExtra(HISTORY_POSITION, HISTORY_END);
-        } else if (savedInstanceState != null) {
-            mHistoryPosition = savedInstanceState.getInt(HISTORY_POSITION);
-        } else {
-            mHistoryPosition = HISTORY_END;
-        }
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -133,18 +126,49 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
-
-        /* Use an AsyncTask to load the JSON file from the web. */
-        // TODO: Maybe move this to after the checkForNetwork() in onResume()
-        if (NetworkUtils.deviceIsConnected(this)) {
-            String jsonUrlString = getString(R.string.json_url);
-            URL jsonUrl = NetworkUtils.buildUrl(jsonUrlString);
-            JsonQueryTask queryTask = new JsonQueryTask();
-            queryTask.execute(jsonUrl);
+        // Find out which position in the history we'd like to view.
+        // This could come from the savedInstanceState
+        // or from Intent extras (when launched by the MuseumHistoryWidgetProvider).
+        // If none of the above, view the end of the history stack (last piece viewed).
+        //Intent sendingIntent = getIntent();
+        //if (sendingIntent != null) {
+        // if (sendingIntent != null && sendingIntent.hasExtra(HISTORY_POSITION)) {
+        //    Log.d(LOG_TAG, "Getting values from sending Intent.");
+        //    mHistoryPosition = sendingIntent.getIntExtra(HISTORY_POSITION, HISTORY_END);
+        //} else
+        if (savedInstanceState != null) {
+            Log.d(LOG_TAG, "Getting values from savedInstanceState.");
+            mHistoryPosition = savedInstanceState.getInt(HISTORY_POSITION, HISTORY_END);
+            mTempPhotoPath = savedInstanceState.getString(TEMP_PHOTO_PATH);
+            // Next 2 lines are necessary to re-establish mHistory.
+            final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this).get(ExhibitHistoryViewModel.class);
+            mHistory = viewModel.getHistoryForConfigurationChange();
+            if (mHistory == null) {
+                Log.e("ViewModel", "viewModel returns null History.");
+            } else {
+                Log.d("ViewModel", "Retrieved history of size " + mHistory.size());
+            }
+            // Retrieve the json, which will also re-instate the previous mHistory.
+            String exhibitsJson = savedInstanceState.getString(EXHIBITS_JSON);
+            processExhibitsJson(exhibitsJson);
         } else {
-            Toast.makeText(this, NO_NETWORK_WARNING, Toast.LENGTH_LONG).show();
-            // TODO: Check if json is stored locally.
+            Log.d(LOG_TAG, "USing default values.  No instance state found.");
+            mHistoryPosition = HISTORY_END;
+            /* Use an AsyncTask to load the JSON file from the web. */
+            // TODO: Maybe move this to after the checkForNetwork() in onResume()
+            if (NetworkUtils.deviceIsConnected(this)) {
+                String jsonUrlString = getString(R.string.json_url);
+                URL jsonUrl = NetworkUtils.buildUrl(jsonUrlString);
+                JsonQueryTask queryTask = new JsonQueryTask();
+                queryTask.execute(jsonUrl);
+            } else {
+                Toast.makeText(this, NO_NETWORK_WARNING, Toast.LENGTH_LONG).show();
+                // TODO: Check if json is stored locally.
+            }
         }
+
+
+
     }
 
     @Override
@@ -231,6 +255,7 @@ public class MainActivity extends AppCompatActivity
             if (imageFile != null) {
                 // Get the file's absolute path.
                 mTempPhotoPath = imageFile.getAbsolutePath();
+                Log.d("Setting mTempPhotoPath",mTempPhotoPath);
 
                 // Store the file's URI as an intent extra, and launch the intent.
                 Uri photoURI = FileProvider.getUriForFile(this,
@@ -247,6 +272,8 @@ public class MainActivity extends AppCompatActivity
 
     // Process data received back from Intents launched by this activity.
     // Specifically, the camera intent.
+    // Note that this is called *before* onResume(), see
+    // https://developer.android.com/reference/android/app/Activity#onActivityResult(int,%20int,%20android.content.Intent)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -265,8 +292,13 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(LOG_TAG, "Destroying Main Activity...");
+    }
+
     // Make sure current piece is valid.
-    // TODO: Do we really need this?
     // This is called from the ViewModel observer's onChange() method.
     private boolean pieceIsValid(int pieceId) {
         // Exhibit ID is encoded in piece ID:
@@ -359,6 +391,12 @@ public class MainActivity extends AppCompatActivity
             public void run() {
                 // As we're using a ViewModel observer, these database updates will
                 // be automatically added to the mHistory field.
+                for (HistoryEntry entry: entriesToUpdate) {
+                    String logMessage = "Updating dabase. ID: " + entry.getPieceId()
+                            + " Previous: " + entry.getPreviousPiece()
+                            + " Next: " + entry.getNextPiece();
+                    Log.d("updateDatabase", logMessage);
+                }
                 mHistoryDb.historyDao().updateOrAddToHistory(entriesToUpdate);
             }
         });
@@ -372,6 +410,7 @@ public class MainActivity extends AppCompatActivity
     private void setUpViewModel() {
         Log.d("setUpViewModel","Setting up view model...");
         final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this).get(ExhibitHistoryViewModel.class);
+        viewModel.getHistory().removeObservers(this);
         viewModel.getHistory().observe(this, new Observer<List<HistoryEntry>>() {
             @Override
             public void onChanged(@Nullable List<HistoryEntry> historyEntries) {
@@ -386,6 +425,7 @@ public class MainActivity extends AppCompatActivity
                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
+                            Log.d("DBViewModel", "History empty, so adding Welcome to history.");
                             mHistoryDb.historyDao().addToHistory(firstEntry);
                         }
                     });
@@ -437,7 +477,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        Log.d(LOG_TAG, "Saving photo path to Bundle: " + mTempPhotoPath);
         outState.putInt(HISTORY_POSITION, mHistoryPosition);
+        outState.putString(TEMP_PHOTO_PATH, mTempPhotoPath);
+        outState.putString(EXHIBITS_JSON, mExhibitsJson);
+        final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this).get(ExhibitHistoryViewModel.class);
+        viewModel.saveHistoryForConfigurationChange(mHistory);
     }
 
     @Override
@@ -468,7 +513,7 @@ public class MainActivity extends AppCompatActivity
         // TODO: Should this be Settings.ACTION_WIFI_SETTINGS?  What's the difference?
         Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
         if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
+            startActivityWithTransition(intent);
         } else {
             Toast.makeText(this,getString(R.string.no_wireless_settings),Toast.LENGTH_LONG).show();
         }
@@ -478,9 +523,19 @@ public class MainActivity extends AppCompatActivity
         Uri webpage = Uri.parse(getString(R.string.museum_tickets_url));
         Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
         if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
+            startActivityWithTransition(intent);
         } else {
             notifyNoWebBrowser();
+        }
+    }
+
+    // Use transitions between activities.
+    private void startActivityWithTransition(Intent intent) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
+            startActivity(intent, bundle);
+        } else {
+            startActivity(intent);
         }
     }
 
@@ -492,7 +547,7 @@ public class MainActivity extends AppCompatActivity
         Uri webpage = Uri.parse(getString(R.string.museum_website_url));
         Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
         if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
+            startActivityWithTransition(intent);
         }
         else {
             notifyNoWebBrowser();
@@ -515,38 +570,45 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String exhibitsJson) {
             super.onPostExecute(exhibitsJson);
-            if (exhibitsJson == null) {
-                // If we couldn't get a remote copy, check for a locally saved copy.
-                exhibitsJson = PreferenceUtils.getPreferenceExhibitsJson(getApplicationContext());
-                if (exhibitsJson == null) {
-                    Log.e(LOG_TAG, "JSON fetch failed.");
-                    Toast.makeText(getApplicationContext(), R.string.no_json_message, Toast.LENGTH_LONG).show();
-                    // App will be packaged with a JSON asset, but changes to the JSON
-                    // after app release will be posted on the museum web site,
-                    // so the local asset is used only as a last resort:
-                    exhibitsJson = JsonUtils.loadJSONFromAsset(getApplicationContext());
-                }
-            }
-
-            // Parse the json.
-            mExhibitsList = JsonUtils.parseExhibitList(exhibitsJson);
-
-            // Add exhibit titles to navigation drawer menu.
-            // https://freakycoder.com/android-notes-53-how-to-create-menu-item-for-navigationdrawer-programmatically-67ddfa8027bc
-            // Note that Menu.findItem(id) finds by *resource* id, whereas Menu.getItem(index) gets by position.
-            // https://developer.android.com/reference/android/view/Menu#findItem(int)
-            SubMenu exhibitsMenu = navigationView.getMenu().findItem(R.id.nav_exhibits_section).getSubMenu();
-            for (Exhibit exhibit: mExhibitsList) {
-                exhibitsMenu.add(exhibit.getExhibitTitle())
-                        .setIcon(R.drawable.ic_menu_gallery);
-                // TODO: Add actions for clicking exhibits.
-            }
-
-            // Set up ViewModel.  This will trigger the observer's onChange, which will
-            // take care of loading the UI by loading the ViewPagerFragment.
-            setUpViewModel();
+            processExhibitsJson(exhibitsJson);
         }
     }
+
+    private void processExhibitsJson(String exhibitsJson) {
+        if (exhibitsJson == null) {
+            // If we couldn't get a remote copy, check for a locally saved copy.
+            Log.d(LOG_TAG, "Fetching JSON from shared preferences.");
+            exhibitsJson = PreferenceUtils.getPreferenceExhibitsJson(getApplicationContext());
+            if (exhibitsJson == null) {
+                Log.e(LOG_TAG, "JSON fetch failed.  Using asset copy.");
+                Toast.makeText(getApplicationContext(), R.string.no_json_message, Toast.LENGTH_LONG).show();
+                // App will be packaged with a JSON asset, but changes to the JSON
+                // after app release will be posted on the museum web site,
+                // so the local asset is used only as a last resort:
+                exhibitsJson = JsonUtils.loadJSONFromAsset(getApplicationContext());
+            }
+        }
+
+        // Parse the json.
+        mExhibitsJson = exhibitsJson;
+        mExhibitsList = JsonUtils.parseExhibitList(exhibitsJson);
+
+        // Add exhibit titles to navigation drawer menu.
+        // https://freakycoder.com/android-notes-53-how-to-create-menu-item-for-navigationdrawer-programmatically-67ddfa8027bc
+        // Note that Menu.findItem(id) finds by *resource* id, whereas Menu.getItem(index) gets by position.
+        // https://developer.android.com/reference/android/view/Menu#findItem(int)
+        SubMenu exhibitsMenu = navigationView.getMenu().findItem(R.id.nav_exhibits_section).getSubMenu();
+        for (Exhibit exhibit: mExhibitsList) {
+            exhibitsMenu.add(exhibit.getExhibitTitle())
+                    .setIcon(R.drawable.ic_menu_gallery);
+            // TODO: Add actions for clicking exhibits.
+        }
+
+        // Set up ViewModel.  This will trigger the observer's onChange, which will
+        // take care of loading the UI by loading the ViewPagerFragment.
+        setUpViewModel();
+    }
+
     private ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {
 
         @Override
