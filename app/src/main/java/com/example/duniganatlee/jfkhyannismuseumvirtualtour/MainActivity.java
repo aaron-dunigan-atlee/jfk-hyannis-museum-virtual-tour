@@ -62,9 +62,8 @@ public class MainActivity extends AppCompatActivity
                     LocationAlertDialog.LocationAlertListener,
                     NoNetworkAlertDialog.NoNetworkAlertListener {
 
-    // Request code for launching camera app
-    private static final int REQUEST_CAMERA_IMAGE = 1;
-
+    // Global constants.
+    private static final int REQUEST_CAMERA_IMAGE = 1; // Request code for launching camera app
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.duniganatlee.fileprovider";
     public static final String PIECE_ID = "piece_id";
     public static final String HISTORY_POSITION = "history_position";
@@ -77,22 +76,26 @@ public class MainActivity extends AppCompatActivity
     private static final String TEMP_PHOTO_PATH = "temp_photo_path";
     private static final String EXHIBITS_JSON = "exhibits_json";
 
-    // Path for a temporary photo taken when user scans a barcode.
-    private String mTempPhotoPath;
-
-    private Exhibit[] mExhibitsList;
-    private AppDatabase mHistoryDb;
-    private List<HistoryEntry> mHistory = new ArrayList<>();
-    HistoryPagerAdapter mPagerAdapter;
-    private int mHistoryPosition;
-    private String mExhibitsJson;
-
     // Views for ButterKnife binding.
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.fab_camera) FloatingActionButton fab;
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
     @BindView(R.id.nav_view) NavigationView navigationView;
     @BindView(R.id.view_pager) ViewPager viewPager;
+
+    // Path for a temporary photo taken when user scans a barcode.
+    private String mTempPhotoPath;
+
+    private Exhibit[] mExhibitsList;
+    private AppDatabase mHistoryDb;
+    private List<HistoryEntry> mHistory;
+    HistoryPagerAdapter mPagerAdapter;
+    private int mHistoryPosition;
+    private String mExhibitsJson;
+
+    private boolean setUpViewModelFinished;
+    private boolean databaseUpdatePending;
+    private int pendingPieceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +106,6 @@ public class MainActivity extends AppCompatActivity
         viewPager.addOnPageChangeListener(pageChangeListener);
         setTitle(R.string.app_short_name);
         setSupportActionBar(toolbar);
-
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,7 +121,7 @@ public class MainActivity extends AppCompatActivity
         // Get instance of viewing history database.
         mHistoryDb = AppDatabase.getInstance(getApplication());
 
-
+        // Set up ActionBar toggle
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -136,23 +138,17 @@ public class MainActivity extends AppCompatActivity
         //    Log.d(LOG_TAG, "Getting values from sending Intent.");
         //    mHistoryPosition = sendingIntent.getIntExtra(HISTORY_POSITION, HISTORY_END);
         //} else
+        databaseUpdatePending = false;
+        setUpViewModelFinished = false;
         if (savedInstanceState != null) {
             Log.d(LOG_TAG, "Getting values from savedInstanceState.");
             mHistoryPosition = savedInstanceState.getInt(HISTORY_POSITION, HISTORY_END);
             mTempPhotoPath = savedInstanceState.getString(TEMP_PHOTO_PATH);
-            // Next 2 lines are necessary to re-establish mHistory.
-            final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this).get(ExhibitHistoryViewModel.class);
-            mHistory = viewModel.getHistoryForConfigurationChange();
-            if (mHistory == null) {
-                Log.e("ViewModel", "viewModel returns null History.");
-            } else {
-                Log.d("ViewModel", "Retrieved history of size " + mHistory.size());
-            }
-            // Retrieve the json, which will also re-instate the previous mHistory.
+            // Retrieve the json, which *should* also re-instate the previous mHistory.
             String exhibitsJson = savedInstanceState.getString(EXHIBITS_JSON);
             processExhibitsJson(exhibitsJson);
         } else {
-            Log.d(LOG_TAG, "USing default values.  No instance state found.");
+            Log.d(LOG_TAG, "Using default values.  No instance state found.");
             mHistoryPosition = HISTORY_END;
             /* Use an AsyncTask to load the JSON file from the web. */
             // TODO: Maybe move this to after the checkForNetwork() in onResume()
@@ -322,6 +318,16 @@ public class MainActivity extends AppCompatActivity
     // which will in turn update the adapter on the ViewPagerFragment to show the
     // new piece in the UI.
     private void updateDatabase(int newPieceId) {
+        // If the device is rotated while the camera activity is open, upon return this
+        // updateDatabase method may be called *before* the viewModel has loaded the current
+        // state of the database, causing asynchronous havoc.  Therefore, check if setupViewModel has finished
+        // before running this method.
+        if (!setUpViewModelFinished) {
+            Log.d("updateDatabase","Pending database update.  Waiting for ViewModel to get current database state.");
+            databaseUpdatePending = true;
+            pendingPieceId = newPieceId;
+            return;
+        }
         // This will cause the ViewPager to scroll to the new piece after we are done:
         mHistoryPosition = HISTORY_END;
         // We want to collect all entries to be updated in the db,
@@ -410,12 +416,14 @@ public class MainActivity extends AppCompatActivity
     private void setUpViewModel() {
         Log.d("setUpViewModel","Setting up view model...");
         final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this).get(ExhibitHistoryViewModel.class);
-        viewModel.getHistory().removeObservers(this);
         viewModel.getHistory().observe(this, new Observer<List<HistoryEntry>>() {
             @Override
             public void onChanged(@Nullable List<HistoryEntry> historyEntries) {
                 mHistory = historyEntries;
-                if (mHistory == null) return;
+                if (mHistory == null) {
+                    Log.e("onChanged","Null history returned.");
+                    return;
+                }
                 Log.d("Database change", "New history size " + mHistory.size());
                 if (mHistory.size() == 0) {
                     // History is empty, so add Welcome as the first entry.  This will
@@ -470,6 +478,12 @@ public class MainActivity extends AppCompatActivity
                     }
 
                 }
+                setUpViewModelFinished = true;
+                if (databaseUpdatePending) {
+                    databaseUpdatePending = false;
+                    Log.d("onChanged","Resolving pending database update.");
+                    updateDatabase(pendingPieceId);
+                }
             }
         });
     }
@@ -477,12 +491,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(LOG_TAG, "Saving photo path to Bundle: " + mTempPhotoPath);
+        Log.d(LOG_TAG, "Saving Instance State.");
         outState.putInt(HISTORY_POSITION, mHistoryPosition);
         outState.putString(TEMP_PHOTO_PATH, mTempPhotoPath);
         outState.putString(EXHIBITS_JSON, mExhibitsJson);
-        final ExhibitHistoryViewModel viewModel = ViewModelProviders.of(this).get(ExhibitHistoryViewModel.class);
-        viewModel.saveHistoryForConfigurationChange(mHistory);
     }
 
     @Override

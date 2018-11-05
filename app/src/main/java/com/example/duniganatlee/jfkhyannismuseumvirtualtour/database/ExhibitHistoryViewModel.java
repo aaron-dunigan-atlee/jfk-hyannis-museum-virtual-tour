@@ -11,7 +11,6 @@ import java.util.List;
 // ViewModel for loading the history database.
 public class ExhibitHistoryViewModel extends AndroidViewModel {
     private LiveData<List<HistoryEntry>> history;
-    private final MutableLiveData<List<HistoryEntry>> historyListForConfigChange = new MutableLiveData<List<HistoryEntry>>();
     private final static String LOG_TAG = "ExhibitHistoryViewModel";
     public ExhibitHistoryViewModel(@NonNull Application application) {
         super(application);
@@ -19,22 +18,6 @@ public class ExhibitHistoryViewModel extends AndroidViewModel {
         history = database.historyDao().loadHistory();
     }
 
-    public LiveData<List<HistoryEntry>> getHistory() {
-        if (history == null) {
-            AppDatabase database = AppDatabase.getInstance(this.getApplication());
-            history = database.historyDao().loadHistory();
-        }
-            return history;
-    }
-
-    public void saveHistoryForConfigurationChange(List<HistoryEntry> historyEntries) {
-        Log.d(LOG_TAG, "Saving history.");
-        historyListForConfigChange.setValue(historyEntries);
-    }
-
-    public List<HistoryEntry> getHistoryForConfigurationChange() {
-        Log.d(LOG_TAG, "Restoring history.");
-        return historyListForConfigChange.getValue();
-    }
+    public LiveData<List<HistoryEntry>> getHistory() { return history; }
 
 }
