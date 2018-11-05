@@ -132,12 +132,7 @@ public class MainActivity extends AppCompatActivity
         // This could come from the savedInstanceState
         // or from Intent extras (when launched by the MuseumHistoryWidgetProvider).
         // If none of the above, view the end of the history stack (last piece viewed).
-        //Intent sendingIntent = getIntent();
-        //if (sendingIntent != null) {
-        // if (sendingIntent != null && sendingIntent.hasExtra(HISTORY_POSITION)) {
-        //    Log.d(LOG_TAG, "Getting values from sending Intent.");
-        //    mHistoryPosition = sendingIntent.getIntExtra(HISTORY_POSITION, HISTORY_END);
-        //} else
+        Intent sendingIntent = getIntent();
         databaseUpdatePending = false;
         setUpViewModelFinished = false;
         if (savedInstanceState != null) {
@@ -148,10 +143,16 @@ public class MainActivity extends AppCompatActivity
             String exhibitsJson = savedInstanceState.getString(EXHIBITS_JSON);
             processExhibitsJson(exhibitsJson);
         } else {
-            Log.d(LOG_TAG, "Using default values.  No instance state found.");
-            mHistoryPosition = HISTORY_END;
+            if (sendingIntent != null && sendingIntent.hasExtra(HISTORY_POSITION)) {
+                Log.d(LOG_TAG, "Getting values from sending Intent.");
+                mHistoryPosition = sendingIntent.getIntExtra(HISTORY_POSITION, HISTORY_END);
+            } else {
+                Log.d(LOG_TAG, "Using default values.  No instance state found.");
+                mHistoryPosition = HISTORY_END;
+            }
             /* Use an AsyncTask to load the JSON file from the web. */
             // TODO: Maybe move this to after the checkForNetwork() in onResume()
+            // TODO: Check for local copy first?  (But how to know if it's been updated?)
             if (NetworkUtils.deviceIsConnected(this)) {
                 String jsonUrlString = getString(R.string.json_url);
                 URL jsonUrl = NetworkUtils.buildUrl(jsonUrlString);
@@ -162,9 +163,6 @@ public class MainActivity extends AppCompatActivity
                 // TODO: Check if json is stored locally.
             }
         }
-
-
-
     }
 
     @Override
@@ -238,8 +236,8 @@ public class MainActivity extends AppCompatActivity
         }
         // Intent to launch the camera.
         Intent launchCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Check if there's an app to handle this intent.
 
+        // Check if there's an app to handle this intent.
         if (launchCameraIntent.resolveActivity(getPackageManager()) != null) {
             File imageFile = null;
             try {
@@ -407,8 +405,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-
-
 
     // Set up ViewModel.  This should observe the database for items in the current exhibit.
     // If the database is changed, mHistory will be updated to reflect the change.
