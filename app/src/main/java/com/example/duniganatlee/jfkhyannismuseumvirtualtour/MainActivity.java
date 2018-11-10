@@ -49,6 +49,7 @@ import com.example.duniganatlee.jfkhyannismuseumvirtualtour.widget.MuseumHistory
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -156,7 +157,7 @@ public class MainActivity extends AppCompatActivity
             if (NetworkUtils.deviceIsConnected(this)) {
                 String jsonUrlString = getString(R.string.json_url);
                 URL jsonUrl = NetworkUtils.buildUrl(jsonUrlString);
-                JsonQueryTask queryTask = new JsonQueryTask();
+                JsonQueryTask queryTask = new JsonQueryTask(this);
                 queryTask.execute(jsonUrl);
             } else {
                 Toast.makeText(this, NO_NETWORK_WARNING, Toast.LENGTH_LONG).show();
@@ -562,8 +563,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private static final class JsonQueryTask extends AsyncTask<URL, Void, String> {
+        // Avoid memory leaks with a WeakReference to the MainActivity.
+        // See https://medium.com/google-developer-experts/finally-understanding-how-references-work-in-android-and-java-26a0d9c92f83
+        private WeakReference<MainActivity> mainActivityWeakReference;
+        private JsonQueryTask(MainActivity mainActivity) {
+            mainActivityWeakReference = new WeakReference<>(mainActivity);
+        }
 
-    private class JsonQueryTask extends AsyncTask<URL, Void, String> {
         @Override
         protected String doInBackground(URL... urls) {
             String result = null;
@@ -578,7 +585,11 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String exhibitsJson) {
             super.onPostExecute(exhibitsJson);
-            processExhibitsJson(exhibitsJson);
+            // Continue if MainActivity has not been killed.
+            MainActivity mainActivity = mainActivityWeakReference.get();
+            if (mainActivity != null) {
+                mainActivity.processExhibitsJson(exhibitsJson);
+            }
         }
     }
 
