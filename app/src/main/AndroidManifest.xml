@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.duniganatlee.jfkhyannismuseumvirtualtour">
+    package="org.jfkhyannismuseum.enhancedtour">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -38,7 +38,7 @@
         <!-- FileProvider will be used to pass file URI to/from camera app. -->
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="com.example.duniganatlee.fileprovider"
+            android:authorities="com.duniganatlee.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
