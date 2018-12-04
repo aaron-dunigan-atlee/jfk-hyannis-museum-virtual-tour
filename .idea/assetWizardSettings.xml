@@ -79,9 +79,9 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="autoMirrored" value="true" />
-                            <entry key="outputName" value="ic_volume_up_black_24dp" />
-                            <entry key="sourceFile" value="C:\Users\DuniganAtLee" />
+                            <entry key="assetSourceType" value="FILE" />
+                            <entry key="outputName" value="ic_qrcode_24dp" />
+                            <entry key="sourceFile" value="D:\udacity\android_phase2\6Capstone\JFK_raw_media\qrcode-24dp.svg" />
                           </map>
                         </option>
                       </PersistentState>

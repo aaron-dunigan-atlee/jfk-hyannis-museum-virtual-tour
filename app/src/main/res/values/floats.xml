@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="jfk_museum_latitude">41.652222</string>
-    <string name="jfk_museum_longitude">-70.284139</string>
+    <string name="jfk_museum_latitude" translatable="false">41.652222</string>
+    <string name="jfk_museum_longitude" translatable="false">-70.284139</string>
 </resources>
