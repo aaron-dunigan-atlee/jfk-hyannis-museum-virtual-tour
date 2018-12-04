@@ -9,7 +9,7 @@
     android:scrollbars="vertical"
     android:scrollIndicators="top|bottom"
     android:scrollbarAlwaysDrawVerticalTrack="true"
-    app:layoutManager="LinearLayoutManager"
+    app:layoutManager="android.support.v7.widget.LinearLayoutManager"
     tools:context=".ResourceListFragment"
     tools:listitem="@layout/fragment_resource_list_item"
     />

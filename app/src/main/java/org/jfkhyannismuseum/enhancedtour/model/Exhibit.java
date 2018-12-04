@@ -23,7 +23,7 @@ public class Exhibit {
     @Expose
     private List<ExhibitPiece> exhibitPieces = null;
 
-    public int getId() { return id; }
+    private int getId() { return id; }
 
     public void setId(int id) { this.id = id; }
 
@@ -35,7 +35,7 @@ public class Exhibit {
         this.exhibitTitle = exhibitTitle;
     }
 
-    public List<ExhibitPiece> getExhibitPieces() {
+    private List<ExhibitPiece> getExhibitPieces() {
         return exhibitPieces;
     }
 

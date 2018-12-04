@@ -25,17 +25,12 @@ public class ResourceListFragment extends Fragment {
     public ResourceListFragment() {
     }
 
-    public void setPiece(ExhibitPiece piece) { mExhibitPiece = piece;};
+    private void setPiece(ExhibitPiece piece) { mExhibitPiece = piece;}
 
     public static ResourceListFragment newInstance(ExhibitPiece piece) {
         ResourceListFragment fragment = new ResourceListFragment();
         fragment.setPiece(piece);
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override

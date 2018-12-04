@@ -10,6 +10,9 @@ import android.preference.PreferenceManager;
 public class PreferenceUtils {
     private static final String EXHIBITS_JSON_KEY = "exhibits_json_key";
 
+    // Prevent instantiation.
+    private PreferenceUtils() {}
+
     public static void setPreferenceExhibitsJson(Context context, String json) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor preferenceEditor = sharedPreferences.edit();

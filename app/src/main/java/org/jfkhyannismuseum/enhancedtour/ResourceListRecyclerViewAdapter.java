@@ -47,9 +47,9 @@ public class ResourceListRecyclerViewAdapter extends RecyclerView.Adapter<Resour
         String resourceType = resource.getType();
         int iconId;
         switch (resourceType) {
-            case "video": iconId = R.drawable.ic_videocam_black_24dp; break;
-            case "audio": iconId = R.drawable.ic_volume_up_black_24dp; break;
-            case "image": iconId = R.drawable.ic_image_black_24dp; break;
+            case ExhibitResource.VIDEO: iconId = R.drawable.ic_videocam_black_24dp; break;
+            case ExhibitResource.AUDIO: iconId = R.drawable.ic_volume_up_black_24dp; break;
+            case ExhibitResource.IMAGE: iconId = R.drawable.ic_image_black_24dp; break;
             default: iconId = R.drawable.ic_play_circle_filled_black_24dp;
         }
         holder.mIconView.setImageResource(iconId);
@@ -78,16 +78,16 @@ public class ResourceListRecyclerViewAdapter extends RecyclerView.Adapter<Resour
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final ImageView mIconView;
-        public final TextView mContentView;
-        public ExhibitResource mResource;
+        final View mView;
+        final ImageView mIconView;
+        final TextView mContentView;
+        ExhibitResource mResource;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             mView = view;
-            mIconView = (ImageView) view.findViewById(R.id.resource_type_icon);
-            mContentView = (TextView) view.findViewById(R.id.resource_title);
+            mIconView = view.findViewById(R.id.resource_type_icon);
+            mContentView = view.findViewById(R.id.resource_title);
         }
 
         @Override

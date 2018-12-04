@@ -6,7 +6,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.util.Log;
 
 import org.jfkhyannismuseum.enhancedtour.database.HistoryEntry;
-import org.jfkhyannismuseum.enhancedtour.model.Exhibit;
 import org.jfkhyannismuseum.enhancedtour.utils.HistoryUtils;
 
 import java.util.List;
@@ -14,11 +13,11 @@ import java.util.List;
 /* Pager adapter to allow swiping through the history.
   Based on https://developer.android.com/training/implementing-navigation/lateral.
  */
-public class HistoryPagerAdapter extends FragmentStatePagerAdapter {
+class HistoryPagerAdapter extends FragmentStatePagerAdapter {
     private final static String LOG_TAG = "HistoryPagerAdapter";
     private List<HistoryEntry> mHistory;
-    private FragmentManager mFragmentManager;
-    public HistoryPagerAdapter(FragmentManager fm, List<HistoryEntry> history, Exhibit[] exhibitList) {
+
+    public HistoryPagerAdapter(FragmentManager fm, List<HistoryEntry> history) {
         super(fm);
         mHistory = history;
     }

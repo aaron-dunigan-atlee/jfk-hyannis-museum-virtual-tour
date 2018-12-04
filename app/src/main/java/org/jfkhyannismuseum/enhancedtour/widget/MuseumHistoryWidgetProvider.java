@@ -17,9 +17,8 @@ import java.util.List;
  * Implementation of App Widget functionality.
  */
 public class MuseumHistoryWidgetProvider extends AppWidgetProvider {
-    private static final String WIDGET_LOG_TAG = "WidgetProvider";
     public static List<HistoryEntry> mHistory = new ArrayList<>();
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+    private static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), org.jfkhyannismuseum.enhancedtour.R.layout.museum_history_widget);
         // Set the adapter for the ListView

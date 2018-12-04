@@ -32,7 +32,7 @@ public class HistoryEntry {
         return pieceId;
     }
 
-    public void setPieceId(int pieceId) {
+    private void setPieceId(int pieceId) {
         this.pieceId = pieceId;
     }
 
@@ -40,7 +40,7 @@ public class HistoryEntry {
         return exhibitId;
     }
 
-    public void setExhibitId(int exhibitId) {
+    private void setExhibitId(int exhibitId) {
         this.exhibitId = exhibitId;
     }
 

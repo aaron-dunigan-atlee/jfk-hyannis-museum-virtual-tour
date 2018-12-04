@@ -5,6 +5,8 @@ import org.jfkhyannismuseum.enhancedtour.database.HistoryEntry;
 import java.util.List;
 
 public class HistoryUtils {
+    // Prevent instantiation.
+    private HistoryUtils() {}
     // Get the final entry (the last one in the stack) for a history list.
     public static HistoryEntry getFinalEntry(List<HistoryEntry> history) {
         if (history.size() == 0) { return null; }
@@ -17,7 +19,7 @@ public class HistoryUtils {
     }
 
     // Get the first entry in the history stack.
-    public static HistoryEntry getFirstEntry(List<HistoryEntry> history) {
+    private static HistoryEntry getFirstEntry(List<HistoryEntry> history) {
         if (history.size() == 0) { return null; }
         for (HistoryEntry entry : history) {
             if (entry.getPreviousPiece() == HistoryEntry.NONE) {

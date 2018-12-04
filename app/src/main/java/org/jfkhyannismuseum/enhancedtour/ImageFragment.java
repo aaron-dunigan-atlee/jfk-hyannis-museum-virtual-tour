@@ -26,7 +26,8 @@ public class ImageFragment extends Fragment {
     private static final int DEFAULT_IMAGE_ID = R.drawable.jfklogo_bluebg_mobile;
     private String mImageUrl;
     private String mImageTitle;
-    @BindView(R.id.media_image_view) ImageView mediaImageView;
+    @BindView(R.id.media_image_view)
+    ImageView mediaImageView;
 
     public ImageFragment() {
         // Required empty public constructor
@@ -35,13 +36,10 @@ public class ImageFragment extends Fragment {
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
-     *
      * @param imageUrl URL of the image to be loaded.
-     * @param imageTitle Content description of the image.
      * @return A new instance of fragment ImageFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static ImageFragment newInstance(String imageUrl, String imageTitle) {
+    public static ImageFragment newInstance(String imageUrl) {
         ImageFragment fragment = new ImageFragment();
         Bundle args = new Bundle();
         args.putString(IMAGE_URL, imageUrl);

@@ -12,6 +12,9 @@ import java.net.URL;
 import java.util.Scanner;
 
 public class NetworkUtils {
+    // Prevent instantiation.
+    private NetworkUtils() {}
+
     public static URL buildUrl(String urlString) {
         URL url = null;
         try {

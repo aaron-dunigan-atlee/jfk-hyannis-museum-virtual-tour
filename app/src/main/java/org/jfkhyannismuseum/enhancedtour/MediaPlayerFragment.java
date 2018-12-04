@@ -40,12 +40,11 @@ import butterknife.ButterKnife;
  * create an instance of this fragment.
  */
 public class MediaPlayerFragment extends Fragment {
-    private static final String LOG_TAG = "MediaPlayerFragment";
     private static final String MEDIA_URL = "media_url";
     private static final String BACKGROUND_URL = "background_url";
-    public static final String NO_MEDIA = "no_media";
-    public static final String DEFAULT_BACKGROUND = "default_background";
-    public static final int DEFAULT_BACKGROUND_ID = R.drawable.jfklogo_bluebg_mobile;
+    private static final String NO_MEDIA = "no_media";
+    private static final String DEFAULT_BACKGROUND = "default_background";
+    private static final int DEFAULT_BACKGROUND_ID = R.drawable.jfklogo_bluebg_mobile;
     private static final boolean DEFAULT_AUTOPLAY = false;
     private static final int DEFAULT_WINDOW_INDEX = 0;
     private static final long DEFAULT_PLAYBACK_POSITION = 0;
@@ -97,7 +96,6 @@ public class MediaPlayerFragment extends Fragment {
             mMediaUrl = NO_MEDIA;
             mBackgroundUrl = DEFAULT_BACKGROUND;
         }
-
     }
 
     @Override
@@ -139,7 +137,7 @@ public class MediaPlayerFragment extends Fragment {
     }
 
     // Initialize ExoPlayer.  See https://google.github.io/ExoPlayer/guide.html
-    public void initializePlayer() {
+    private void initializePlayer() {
         if (mExoPlayer == null) {
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();

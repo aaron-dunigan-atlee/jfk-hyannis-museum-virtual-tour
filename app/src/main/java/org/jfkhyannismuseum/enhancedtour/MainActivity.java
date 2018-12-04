@@ -31,8 +31,8 @@ import android.view.SubMenu;
 import android.view.View;
 import android.widget.Toast;
 
-import org.jfkhyannismuseum.enhancedtour.alert_dialogs.LocationAlertDialog;
-import org.jfkhyannismuseum.enhancedtour.alert_dialogs.NoNetworkAlertDialog;
+import org.jfkhyannismuseum.enhancedtour.dialogs.LocationAlertDialog;
+import org.jfkhyannismuseum.enhancedtour.dialogs.NoNetworkAlertDialog;
 import org.jfkhyannismuseum.enhancedtour.database.AppDatabase;
 import org.jfkhyannismuseum.enhancedtour.database.ExhibitHistoryViewModel;
 import org.jfkhyannismuseum.enhancedtour.database.HistoryEntry;
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity
 
     // Global constants.
     private static final int REQUEST_CAMERA_IMAGE = 1; // Request code for launching camera app
-    private static final String FILE_PROVIDER_AUTHORITY = "com.duniganatlee.fileprovider";
+    private static final String FILE_PROVIDER_AUTHORITY = "org.jfkhyannismuseum.fileprovider";
     public static final String PIECE_ID = "piece_id";
     public static final String HISTORY_POSITION = "history_position";
     public static final int WELCOME_ID = 0;
@@ -78,11 +78,16 @@ public class MainActivity extends AppCompatActivity
     private static final String EXHIBITS_JSON = "exhibits_json";
 
     // Views for ButterKnife binding.
-    @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.fab_camera) FloatingActionButton fab;
-    @BindView(R.id.drawer_layout) DrawerLayout drawer;
-    @BindView(R.id.nav_view) NavigationView navigationView;
-    @BindView(R.id.view_pager) ViewPager viewPager;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.fab_camera)
+    FloatingActionButton fab;
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawer;
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
+    @BindView(R.id.view_pager)
+    ViewPager viewPager;
 
     // Path for a temporary photo taken when user scans a barcode.
     private String mTempPhotoPath;
@@ -90,7 +95,7 @@ public class MainActivity extends AppCompatActivity
     private Exhibit[] mExhibitsList;
     private AppDatabase mHistoryDb;
     private List<HistoryEntry> mHistory;
-    HistoryPagerAdapter mPagerAdapter;
+    private HistoryPagerAdapter mPagerAdapter;
     private int mHistoryPosition;
     private String mExhibitsJson;
 
@@ -101,7 +106,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(LOG_TAG, "Creating Main Activity...");
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         viewPager.addOnPageChangeListener(pageChangeListener);
@@ -117,7 +121,7 @@ public class MainActivity extends AppCompatActivity
 
         // Check whether user is at the JFK Hyannis Museum.
         // If so, LocationUtils.userIsAtMuseum will be set to true.
-        LocationUtils.checkLocation(this);
+        LocationUtils.checkLocation();
 
         // Get instance of viewing history database.
         mHistoryDb = AppDatabase.getInstance(getApplication());
@@ -215,13 +219,17 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        if (id == R.id.nav_camera) {
-            getImageFromCamera();
-        } else if (id == R.id.get_tickets) {
-            launchTicketPurchase();
-        } else if (id == R.id.visit_website) {
-            visitWebsite();
-        } 
+        switch (id) {
+            case R.id.nav_camera:
+                getImageFromCamera();
+                break;
+            case R.id.get_tickets:
+                launchTicketPurchase();
+                break;
+            case R.id.visit_website:
+                visitWebsite();
+                break;
+        }
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -283,14 +291,8 @@ public class MainActivity extends AppCompatActivity
             }
         } else {
             // Otherwise, delete the temporary image file
-            ImageUtils.deleteTemporaryImageFile(this, mTempPhotoPath);
+            ImageUtils.deleteTemporaryImageFile(mTempPhotoPath);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(LOG_TAG, "Destroying Main Activity...");
     }
 
     // Make sure current piece is valid.
@@ -397,7 +399,7 @@ public class MainActivity extends AppCompatActivity
                 // As we're using a ViewModel observer, these database updates will
                 // be automatically added to the mHistory field.
                 for (HistoryEntry entry: entriesToUpdate) {
-                    String logMessage = "Updating dabase. ID: " + entry.getPieceId()
+                    String logMessage = "Updating database. ID: " + entry.getPieceId()
                             + " Previous: " + entry.getPreviousPiece()
                             + " Next: " + entry.getNextPiece();
                     Log.d("updateDatabase", logMessage);
@@ -458,7 +460,7 @@ public class MainActivity extends AppCompatActivity
                     appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list_history);
 
                     // Re-set viewPager with updated history.
-                    mPagerAdapter = new HistoryPagerAdapter(getSupportFragmentManager(), mHistory, mExhibitsList);
+                    mPagerAdapter = new HistoryPagerAdapter(getSupportFragmentManager(), mHistory);
                     viewPager.setAdapter(mPagerAdapter);
                     if (mHistoryPosition == HISTORY_END) {
                         int historySize = mHistory.size();
@@ -500,7 +502,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onLocationDialogNeutralClick(DialogFragment dialog) {
-        LocationUtils.checkLocation(this);
+        LocationUtils.checkLocation();
     }
 
     @Override
@@ -629,13 +631,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {
-
         @Override
         public void onPageSelected(int newPosition) {
-            int currentPosition = mHistoryPosition;
             List<Fragment> fragments = getSupportFragmentManager().getFragments();
-            //Fragment fragmentToShow = mPagerAdapter.getItem(newPosition);
-            //Fragment fragmentToHide = mPagerAdapter.getItem(currentPosition);
+
             for (Fragment fragment: fragments) {
                 if (fragment instanceof ViewPagerFragment) {
                     Log.d("Fragment ID",Integer.toString(fragment.getId()));

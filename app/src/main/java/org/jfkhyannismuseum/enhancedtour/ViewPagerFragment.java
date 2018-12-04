@@ -33,13 +33,13 @@ import butterknife.ButterKnife;
 public class ViewPagerFragment extends Fragment {
 
     // Argument keys
-    public static final String PIECE_ID = MainActivity.PIECE_ID;
+    private static final String PIECE_ID = MainActivity.PIECE_ID;
 
     private int mPieceId;
     private ExhibitPiece mPiece;
     private Context mContext;
     private FragmentActivity mHostActivity;
-    FragmentSharedViewModel fragmentSharedViewModel;
+    private FragmentSharedViewModel fragmentSharedViewModel;
     private Fragment mMediaFragment;
 
     @BindView(R.id.piece_description_text_view) TextView pieceDescriptionTextView;
@@ -123,7 +123,7 @@ public class ViewPagerFragment extends Fragment {
         FragmentManager fragmentManager = getChildFragmentManager();
         if (resource.getType().equals(ExhibitResource.IMAGE)) {
             mMediaFragment = ImageFragment
-                    .newInstance(resource.getResourceURL(), resource.getTitle());
+                    .newInstance(resource.getResourceURL());
         } else {
             mMediaFragment = MediaPlayerFragment
                     .newInstance(resource.getResourceURL(), resource.getBackgroundImageURL());

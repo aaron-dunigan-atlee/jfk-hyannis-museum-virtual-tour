@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_menu_camera"
+        android:src="@drawable/ic_qrcode_24dp"
         android:contentDescription="@string/fab_camera_content_description"/>
 
 </android.support.design.widget.CoordinatorLayout>

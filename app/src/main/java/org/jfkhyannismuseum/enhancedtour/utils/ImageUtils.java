@@ -25,6 +25,9 @@ import java.util.Date;
 public class ImageUtils {
     private static final String LOG_TAG = "ImageUtils";
 
+    // Prevent instantiation.
+    private ImageUtils() {}
+
     // Create a temporary image file in the app's cache directory, in order to store camera images
     // for barcode processing.
     // See https://developer.android.com/training/camera/photobasics
@@ -40,7 +43,7 @@ public class ImageUtils {
         );
     }
 
-    public static boolean deleteTemporaryImageFile(Context context, String filePath) {
+    public static boolean deleteTemporaryImageFile(String filePath) {
         // Get the file.
         File fileToDelete = new File(filePath);
 
@@ -54,7 +57,7 @@ public class ImageUtils {
         return deleted;
     }
 
-    public static SparseArray<Barcode> detectBarcodes(Context context, String filePath) {
+    private static SparseArray<Barcode> detectBarcodes(Context context, String filePath) {
         // Setup barcode detector
         BarcodeDetector detector =
                 new BarcodeDetector.Builder(context.getApplicationContext())
@@ -74,20 +77,21 @@ public class ImageUtils {
 
     public static Integer getBarcodeFromImage(Context context, String photoPath) {
         SparseArray<Barcode> barcodes = ImageUtils.detectBarcodes(context, photoPath);
-        ImageUtils.deleteTemporaryImageFile(context, photoPath);
+        ImageUtils.deleteTemporaryImageFile(photoPath);
         if (barcodes != null) {
             // Check that there is exactly one barcode detected.
-            if (barcodes.size() == 1) {
-                Barcode barcode = barcodes.valueAt(0);
-                String barcodeContent = barcode.rawValue;
-                Log.d("Barcode found", barcodeContent);
-                return processBarcode(barcode);
-            } else if (barcodes.size() == 0) {
-                Log.d("Barcode","No barcodes in image.");
-                return null;
-            } else {
-                Log.d("Barcode","Multiple barcodes in image.");
-                return null;
+            switch (barcodes.size()) {
+                case 1:
+                    Barcode barcode = barcodes.valueAt(0);
+                    String barcodeContent = barcode.rawValue;
+                    Log.d("Barcode found", barcodeContent);
+                    return processBarcode(barcode);
+                case 0:
+                    Log.d("Barcode", "No barcodes in image.");
+                    return null;
+                default:
+                    Log.d("Barcode", "Multiple barcodes in image.");
+                    return null;
             }
         }
         Log.d("Barcode","barcodes was null");
@@ -136,7 +140,9 @@ public class ImageUtils {
             }
             @Override
             public void onPrepareLoad(Drawable placeHolderDrawable) {
-                if (placeHolderDrawable != null) {}
+                if (placeHolderDrawable != null) {
+                    //TODO: Implement placeholder.
+                }
             }
         };
     }

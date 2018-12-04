@@ -11,12 +11,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class JsonUtils {
-    public static final String JSON_LOG_TAG = "JSON";
+
+    // Prevent instantiation.
+    private JsonUtils() {}
 
     // Method to load Json from local file asset.
     // Taken from https://stackoverflow.com/questions/19945411/android-java-how-can-i-parse-a-local-json-file-from-assets-folder-into-a-listvi/19945484#19945484
     public static String loadJSONFromAsset(Context context) {
-        String json = null;
+        String json;
         try {
             InputStream is = context.getAssets().open(context.getString(org.jfkhyannismuseum.enhancedtour.R.string.json_filename));
             int size = is.available();

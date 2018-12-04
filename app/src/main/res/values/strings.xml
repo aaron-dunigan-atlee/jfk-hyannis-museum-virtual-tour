@@ -52,4 +52,6 @@
     <string name="no_json_message">Could not retrieve exhibit record.  Using default version.</string>
     <string name="invalid_history_entry_message">Something went wrong.</string>
     <string name="fab_camera_content_description">Click to scan a barcode</string>
+    <string name="widget_title">JFK Hyannis Museum</string>
+    <string name="widget_title_text_size">20sp</string>
 </resources>
