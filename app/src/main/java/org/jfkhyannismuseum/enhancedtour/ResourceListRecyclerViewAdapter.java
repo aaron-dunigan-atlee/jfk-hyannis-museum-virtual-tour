@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,11 +55,13 @@ public class ResourceListRecyclerViewAdapter extends RecyclerView.Adapter<Resour
         }
         holder.mIconView.setImageResource(iconId);
         holder.mIconView.setContentDescription(resourceType);
+
         holder.mContentView.setText(resource.getTitle());
         final FragmentSharedViewModel model = ViewModelProviders.of(mActivity).get(FragmentSharedViewModel.class);
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("ResourceList","Item clicked.");
                 int adapterPosition = holder.getAdapterPosition();
                 // If user re-clicks the currently viewed resource, don't reload.
                 if (adapterPosition != mSelectedPosition) {

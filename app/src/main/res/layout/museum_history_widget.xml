@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/widget_title"
-        android:textSize="@string/widget_title_text_size"
+        android:textSize="@dimen/widget_title_text_size"
         android:textColor="@color/colorAccent"
         android:background="@color/colorPrimaryLight"/>
 

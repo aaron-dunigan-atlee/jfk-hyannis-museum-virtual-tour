@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:focusableInTouchMode="true"
     android:orientation="horizontal"
     android:layout_margin="@dimen/list_item_margin"
     >
-    <!-- (That selectableItemBackground property sets the item to ripple when clicked and stay highlighted afterward.) -->
+    <!--TODO: Allow selection to remain highlighted.-->
+    <!-- (That selectableItemBackground property sets the item to ripple when clicked.) -->
 
     <ImageView
         android:id="@+id/resource_type_icon"
