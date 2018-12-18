@@ -46,6 +46,7 @@ import org.jfkhyannismuseum.enhancedtour.utils.LocationUtils;
 import org.jfkhyannismuseum.enhancedtour.utils.NetworkUtils;
 import org.jfkhyannismuseum.enhancedtour.utils.PreferenceUtils;
 import org.jfkhyannismuseum.enhancedtour.widget.MuseumHistoryWidgetProvider;
+import org.json.JSONException;
 
 import java.io.File;
 import java.io.IOException;
@@ -144,10 +145,10 @@ public class MainActivity extends AppCompatActivity
             Log.d(LOG_TAG, "Getting values from savedInstanceState.");
             mHistoryPosition = savedInstanceState.getInt(HISTORY_POSITION, HISTORY_END);
             mTempPhotoPath = savedInstanceState.getString(TEMP_PHOTO_PATH);
-            // Retrieve the json, which *should* also re-instate the previous mHistory.
-            String exhibitsJson = savedInstanceState.getString(EXHIBITS_JSON);
-            processExhibitsJson(exhibitsJson);
+            // Retrieve the json.
+            mExhibitsJson = savedInstanceState.getString(EXHIBITS_JSON);
         } else {
+            mExhibitsJson = loadLocalJson();
             if (sendingIntent != null && sendingIntent.hasExtra(HISTORY_POSITION)) {
                 Log.d(LOG_TAG, "Getting values from sending Intent.");
                 mHistoryPosition = sendingIntent.getIntExtra(HISTORY_POSITION, HISTORY_END);
@@ -155,6 +156,14 @@ public class MainActivity extends AppCompatActivity
                 Log.d(LOG_TAG, "Using default values.  No instance state found.");
                 mHistoryPosition = HISTORY_END;
             }
+
+            // Parse the JSON to get the list of available exhibits.
+            mExhibitsList = JsonUtils.parseExhibitList(mExhibitsJson);
+
+            // Set up ViewModel.  This will trigger the observer's onChange, which will
+            // take care of loading the UI by loading the ViewPagerFragment.
+            setUpViewModel();
+
             /* Use an AsyncTask to load the JSON file from the web. */
             // TODO: Maybe move this to after the checkForNetwork() in onResume()
             // TODO: Check for local copy first?  (But how to know if it's been updated?)
@@ -165,7 +174,6 @@ public class MainActivity extends AppCompatActivity
                 queryTask.execute(jsonUrl);
             } else {
                 Toast.makeText(this, NO_NETWORK_WARNING, Toast.LENGTH_LONG).show();
-                // TODO: Check if json is stored locally.
             }
         }
     }
@@ -585,35 +593,45 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected void onPostExecute(String exhibitsJson) {
-            super.onPostExecute(exhibitsJson);
+        protected void onPostExecute(String remoteExhibitsJson) {
+            super.onPostExecute(remoteExhibitsJson);
             // Continue if MainActivity has not been killed.
             MainActivity mainActivity = mainActivityWeakReference.get();
             if (mainActivity != null) {
-                mainActivity.processExhibitsJson(exhibitsJson);
+                try {
+                    int remoteJsonVersion = JsonUtils.getJsonVersion(remoteExhibitsJson);
+                    Log.d("JsonQueryTask","Remote JSON found: version " + remoteJsonVersion);
+                    int currentJsonVersion = JsonUtils.getJsonVersion(mainActivity.mExhibitsJson);
+                    if (remoteJsonVersion > currentJsonVersion) {
+                        // TODO: Ask user if they want to update JSON.
+                        // TODO: Handle updates that lose exhibits in history.
+                        PreferenceUtils.setPreferenceExhibitsJson(mainActivity, remoteExhibitsJson);
+                    }
+                } catch (JSONException exception) {
+                    exception.printStackTrace();
+                }
             }
         }
     }
 
-    private void processExhibitsJson(String exhibitsJson) {
+    private String loadLocalJson() {
+        String exhibitsJson;
+        // If app has already run, previously used JSON should be in shared preferences.
+        Log.d(LOG_TAG, "Fetching JSON from shared preferences.");
+        exhibitsJson = PreferenceUtils.getPreferenceExhibitsJson(getApplicationContext());
         if (exhibitsJson == null) {
-            // If we couldn't get a remote copy, check for a locally saved copy.
-            Log.d(LOG_TAG, "Fetching JSON from shared preferences.");
-            exhibitsJson = PreferenceUtils.getPreferenceExhibitsJson(getApplicationContext());
-            if (exhibitsJson == null) {
-                Log.e(LOG_TAG, "JSON fetch failed.  Using asset copy.");
-                Toast.makeText(getApplicationContext(), R.string.no_json_message, Toast.LENGTH_LONG).show();
-                // App will be packaged with a JSON asset, but changes to the JSON
-                // after app release will be posted on the museum web site,
-                // so the local asset is used only as a last resort:
-                exhibitsJson = JsonUtils.loadJSONFromAsset(getApplicationContext());
-            }
+            // If no JSON in shared preferences, use the one packaged with the app.
+            // However, updates to the JSON will be posted on the museum website,
+            // so the AsyncTask will check for an update and replace this if necessary.
+            Log.d(LOG_TAG, "JSON fetch failed.  Using asset copy.");
+            exhibitsJson = JsonUtils.loadJSONFromAsset(getApplicationContext());
+            PreferenceUtils.setPreferenceExhibitsJson(this, exhibitsJson);
         }
-
-        // Parse the json.
         mExhibitsJson = exhibitsJson;
-        mExhibitsList = JsonUtils.parseExhibitList(exhibitsJson);
+        return exhibitsJson;
+    }
 
+    private void addExhibitMenus() {
         // Add exhibit titles to navigation drawer menu.
         // https://freakycoder.com/android-notes-53-how-to-create-menu-item-for-navigationdrawer-programmatically-67ddfa8027bc
         // Note that Menu.findItem(id) finds by *resource* id, whereas Menu.getItem(index) gets by position.
@@ -624,10 +642,6 @@ public class MainActivity extends AppCompatActivity
                     .setIcon(R.drawable.ic_menu_gallery);
             // TODO: Add actions for clicking exhibits.
         }
-
-        // Set up ViewModel.  This will trigger the observer's onChange, which will
-        // take care of loading the UI by loading the ViewPagerFragment.
-        setUpViewModel();
     }
 
     private ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {

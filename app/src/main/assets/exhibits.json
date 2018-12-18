@@ -1,4 +1,5 @@
-[{"exhibit_title":"Welcome to JFK Hyannis Museum",
+{"json_version":1,
+  "exhibits": [{"exhibit_title":"Welcome to JFK Hyannis Museum",
   "id":0,
   "exhibit_pieces":[
     {"id":0,
@@ -167,4 +168,4 @@
       }]
     }
 ]}
-  ]
+  ]}

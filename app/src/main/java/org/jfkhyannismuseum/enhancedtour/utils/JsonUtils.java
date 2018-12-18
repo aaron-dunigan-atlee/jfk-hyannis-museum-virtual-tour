@@ -4,8 +4,12 @@ import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import org.jfkhyannismuseum.enhancedtour.model.Exhibit;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,14 +37,30 @@ public class JsonUtils {
         return json;
     }
 
+    private static String getExhibitListJson(String fullJsonString) throws JSONException {
+        JSONObject fullJson = new JSONObject(fullJsonString);
+        JSONArray exhibitsArray = fullJson.getJSONArray("exhibits");
+        return exhibitsArray.toString();
+    }
+
+    public static int getJsonVersion(String fullJsonString) throws JSONException {
+        JSONObject fullJSon = new JSONObject(fullJsonString);
+        return fullJSon.getInt("json_version");
+    }
 
     /*
     Given the JSON exhibit list, extract each individual exhibit, assign it to an exhibit object,
     and return an array of all exhibits.
      */
-    public static Exhibit[] parseExhibitList(String jsonRecipeList) {
+    public static Exhibit[] parseExhibitList(String jsonString) {
+        String jsonExhibitList;
+        try {
+            jsonExhibitList = getExhibitListJson(jsonString);
+        } catch (JSONException e) {
+            return null;
+        }
         Gson gson = new Gson();
-        Exhibit[] exhibits = gson.fromJson(jsonRecipeList, Exhibit[].class);
+        Exhibit[] exhibits = gson.fromJson(jsonExhibitList, Exhibit[].class);
         Log.d("Exhibits found",Integer.toString(exhibits.length));
         return exhibits;
     }
