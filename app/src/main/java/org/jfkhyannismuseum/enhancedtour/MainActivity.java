@@ -156,26 +156,27 @@ public class MainActivity extends AppCompatActivity
                 Log.d(LOG_TAG, "Using default values.  No instance state found.");
                 mHistoryPosition = HISTORY_END;
             }
-
-            // Parse the JSON to get the list of available exhibits.
-            mExhibitsList = JsonUtils.parseExhibitList(mExhibitsJson);
-
-            // Set up ViewModel.  This will trigger the observer's onChange, which will
-            // take care of loading the UI by loading the ViewPagerFragment.
-            setUpViewModel();
-
-            /* Use an AsyncTask to load the JSON file from the web. */
-            // TODO: Maybe move this to after the checkForNetwork() in onResume()
-            // TODO: Check for local copy first?  (But how to know if it's been updated?)
-            if (NetworkUtils.deviceIsConnected(this)) {
-                String jsonUrlString = getString(R.string.json_url);
-                URL jsonUrl = NetworkUtils.buildUrl(jsonUrlString);
-                JsonQueryTask queryTask = new JsonQueryTask(this);
-                queryTask.execute(jsonUrl);
-            } else {
-                Toast.makeText(this, NO_NETWORK_WARNING, Toast.LENGTH_LONG).show();
-            }
         }
+
+        // Parse the JSON to get the list of available exhibits.
+        mExhibitsList = JsonUtils.parseExhibitList(mExhibitsJson);
+
+        // Set up ViewModel.  This will trigger the observer's onChange, which will
+        // take care of loading the UI by loading the ViewPagerFragment.
+        setUpViewModel();
+
+        /* Use an AsyncTask to load the JSON file from the web. */
+        // TODO: Maybe move this to after the checkForNetwork() in onResume()
+        // TODO: Check for local copy first?  (But how to know if it's been updated?)
+        if (NetworkUtils.deviceIsConnected(this)) {
+            String jsonUrlString = getString(R.string.json_url);
+            URL jsonUrl = NetworkUtils.buildUrl(jsonUrlString);
+            JsonQueryTask queryTask = new JsonQueryTask(this);
+            queryTask.execute(jsonUrl);
+        } else {
+            Toast.makeText(this, NO_NETWORK_WARNING, Toast.LENGTH_LONG).show();
+        }
+
     }
 
     @Override
