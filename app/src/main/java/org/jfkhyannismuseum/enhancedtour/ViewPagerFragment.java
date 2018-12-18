@@ -120,6 +120,9 @@ public class ViewPagerFragment extends Fragment {
     }
 
     private void setResource(ExhibitResource resource) {
+        String text = resource.getText();
+        Log.d("ViewPagerFragment","Text: " + text);
+        pieceDescriptionTextView.setText(text);
         FragmentManager fragmentManager = getChildFragmentManager();
         if (resource.getType().equals(ExhibitResource.IMAGE)) {
             mMediaFragment = ImageFragment

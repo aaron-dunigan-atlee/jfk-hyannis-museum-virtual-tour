@@ -67,7 +67,6 @@ public class ResourceListRecyclerViewAdapter extends RecyclerView.Adapter<Resour
                 if (adapterPosition != mSelectedPosition) {
                     mSelectedPosition = adapterPosition;
                     model.setResource(mExhibitPiece.getId(), holder.mResource);
-
                 }
             }
         });
