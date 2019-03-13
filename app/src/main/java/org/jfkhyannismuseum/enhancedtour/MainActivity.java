@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity
 
         // Check whether user is at the JFK Hyannis Museum.
         // If so, LocationUtils.userIsAtMuseum will be set to true.
-        LocationUtils.checkLocation();
+        LocationUtils.checkLocation(this);
 
         // Get instance of viewing history database.
         mHistoryDb = AppDatabase.getInstance(getApplication());
@@ -511,7 +511,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onLocationDialogNeutralClick(DialogFragment dialog) {
-        LocationUtils.checkLocation();
+        LocationUtils.checkLocation(this);
     }
 
     @Override
