@@ -44,8 +44,13 @@ public class JsonUtils {
     }
 
     public static int getJsonVersion(String fullJsonString) throws JSONException {
-        JSONObject fullJSon = new JSONObject(fullJsonString);
-        return fullJSon.getInt("json_version");
+        if (fullJsonString != null) {
+            JSONObject fullJSon = new JSONObject(fullJsonString);
+            return fullJSon.getInt("json_version");
+        } else {
+            JSONException exception = new JSONException("Null JSON string passed.");
+            throw exception;
+        }
     }
 
     /*
