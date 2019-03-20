@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 import org.jfkhyannismuseum.enhancedtour.model.Exhibit;
 import org.json.JSONArray;

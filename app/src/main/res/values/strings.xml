@@ -1,54 +1,54 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">JFK Hyannis Museum Enhanced Tour</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">JFK Hyannis Museum</string>
-    <string name="nav_header_subtitle">Enhanced Tour</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
+    <string name="navigation_drawer_open" tools:ignore="MissingTranslation">Open navigation drawer</string>
+    <string name="navigation_drawer_close" tools:ignore="MissingTranslation">Close navigation drawer</string>
+    <string name="nav_header_title" tools:ignore="MissingTranslation">JFK Hyannis Museum</string>
+    <string name="nav_header_subtitle" tools:ignore="MissingTranslation">Enhanced Tour</string>
+    <string name="nav_header_desc" tools:ignore="MissingTranslation">Navigation header</string>
+    <string name="action_settings" tools:ignore="MissingTranslation">Settings</string>
 
     <string name="sample_video_URL" translatable="false">https://d17h27t6h515a5.cloudfront.net/topher/2017/April/58ffd974_-intro-creampie/-intro-creampie.mp4</string>
-    <string name="no_camera_app">Cannot take picture. No camera app found.</string>
-    <string name="no_barcode_detector">Could not load barcode detector.</string>
-    <string name="no_barcode_in_image">No barcode was detected in that image.</string>
-    <string name="multiple_barcodes_in_image">Too many barcodes.  Scan just one at a time.</string>
-    <string name="nav_drawer_exhibits_subtitle">Exhibits</string>
-    <string name="nav_exhibit1_name">Ripple of Hope</string>
-    <string name="nav_exhibit2_name">Centennial</string>
-    <string name="nav_scan_barcode">Scan QR code</string>
-    <string name="nav_check_location">Check location</string>
-    <string name="json_filename">exhibits.json</string>
-    <string name="nav_intro_title">Welcome to JFK Hyannis Museum</string>
-    <string name="invalid_barcode">Couldn\'t read that barcode.  Please scan again.</string>
-    <string name="icon_description">icon</string>
-    <string name="appwidget_text">JFK Hyannis Museum</string>
-    <string name="add_widget">Add widget</string>
-    <string name="location_alert_title">Location Alert</string>
-    <string name="location_alert_message">It appears that you are not currently at the JFK Hyannis Museum.  You will not be able to scan barcodes if you are not at the museum.  You can view your history from a previous visit for 30 days.  Would you like to visit the museum\'s website to order tickets?</string>
-    <string name="cancel_location_alert">Cancel</string>
-    <string name="okay_location_alert">Buy tickets</string>
-    <string name="museum_tickets_url">https://fareharbor.com/embeds/book/jfkhyannismuseum/items/32134/calendar/?full-items=yes</string>
-    <string name="museum_website_url">https://jfkhyannismuseum.org/</string>
-    <string name="nav_visit_website">Museum website</string>
-    <string name="nav_get_tickets">Purchase tickets</string>
-    <string name="nav_drawer_visit_subtitle">Visit</string>
-    <string name="app_short_name">JFK Hyannis Museum</string>
-    <string name="resource_title">Resource title</string>
-    <string name="long_resource_title">A really long resource title that might wrap over two or more lines.</string>
-    <string name="json_url">https://jfkhyannismuseum.org/wp-content/mobile-app-data/exhibits.json</string>
+    <string name="no_camera_app" tools:ignore="MissingTranslation">Cannot take picture. No camera app found.</string>
+    <string name="no_barcode_detector" tools:ignore="MissingTranslation">Could not load barcode detector.</string>
+    <string name="no_barcode_in_image" tools:ignore="MissingTranslation">No barcode was detected in that image.</string>
+    <string name="multiple_barcodes_in_image" tools:ignore="MissingTranslation">Too many barcodes.  Scan just one at a time.</string>
+    <string name="nav_drawer_exhibits_subtitle" tools:ignore="MissingTranslation">Exhibits</string>
+    <string name="nav_exhibit1_name" tools:ignore="MissingTranslation">Ripple of Hope</string>
+    <string name="nav_exhibit2_name" tools:ignore="MissingTranslation">Centennial</string>
+    <string name="nav_scan_barcode" tools:ignore="MissingTranslation">Scan QR code</string>
+    <string name="nav_check_location" tools:ignore="MissingTranslation">Check location</string>
+    <string name="json_filename" tools:ignore="MissingTranslation">exhibits.json</string>
+    <string name="nav_intro_title" tools:ignore="MissingTranslation">Welcome to JFK Hyannis Museum</string>
+    <string name="invalid_barcode" tools:ignore="MissingTranslation">Couldn\'t read that barcode.  Please scan again.</string>
+    <string name="icon_description" tools:ignore="MissingTranslation">icon</string>
+    <string name="appwidget_text" tools:ignore="MissingTranslation">JFK Hyannis Museum</string>
+    <string name="add_widget" tools:ignore="MissingTranslation">Add widget</string>
+    <string name="location_alert_title" tools:ignore="MissingTranslation">Location Alert</string>
+    <string name="location_alert_message" tools:ignore="MissingTranslation">It appears that you are not currently at the JFK Hyannis Museum.  You will not be able to scan barcodes if you are not at the museum.  You can view your history from a previous visit for 30 days.  Would you like to visit the museum\'s website to order tickets?</string>
+    <string name="cancel_location_alert" tools:ignore="MissingTranslation">Cancel</string>
+    <string name="okay_location_alert" tools:ignore="MissingTranslation">Buy tickets</string>
+    <string name="museum_tickets_url" tools:ignore="MissingTranslation">https://fareharbor.com/embeds/book/jfkhyannismuseum/items/32134/calendar/?full-items=yes</string>
+    <string name="museum_website_url" tools:ignore="MissingTranslation">https://jfkhyannismuseum.org/</string>
+    <string name="nav_visit_website" tools:ignore="MissingTranslation">Museum website</string>
+    <string name="nav_get_tickets" tools:ignore="MissingTranslation">Purchase tickets</string>
+    <string name="nav_drawer_visit_subtitle" tools:ignore="MissingTranslation">Visit</string>
+    <string name="app_short_name" tools:ignore="MissingTranslation">JFK Hyannis Museum</string>
+    <string name="resource_title" tools:ignore="MissingTranslation">Resource title</string>
+    <string name="long_resource_title" tools:ignore="MissingTranslation">A really long resource title that might wrap over two or more lines.</string>
+    <string name="json_url" tools:ignore="MissingTranslation">https://jfkhyannismuseum.org/wp-content/mobile-app-data/exhibits.json</string>
 
-    <string name="default_image_description">An image from the JFK Hyannis Museum.</string>
-    <string name="no_network_alert_title">Internet not available</string>
-    <string name="no_network_alert_message">You will need an Internet connection to use this app. Check that you are not in airplane mode. If you are at the JFK Hyannis Museum, the staff can help you connect to the museum\'s public wifi.  Would you like to view your wireless network settings?</string>
-    <string name="settings_no_network_alert">View settings</string>
-    <string name="no_web_browser">No web browser found to open that web page.</string>
-    <string name="no_wireless_settings">Unable to open wireless settings</string>
-    <string name="quit_no_network_alert">Quit</string>
-    <string name="try_again_no_network_alert">Try again</string>
-    <string name="check_again_location_alert">Check location again</string>
-    <string name="no_json_message">Could not retrieve exhibit record.  Using default version.</string>
-    <string name="invalid_history_entry_message">Something went wrong.</string>
-    <string name="fab_camera_content_description">Click to scan a barcode</string>
-    <string name="widget_title">JFK Hyannis Museum</string>
+    <string name="default_image_description" tools:ignore="MissingTranslation">An image from the JFK Hyannis Museum.</string>
+    <string name="no_network_alert_title" tools:ignore="MissingTranslation">Internet not available</string>
+    <string name="no_network_alert_message" tools:ignore="MissingTranslation">You will need an Internet connection to use this app. Check that you are not in airplane mode. If you are at the JFK Hyannis Museum, the staff can help you connect to the museum\'s public wifi.  Would you like to view your wireless network settings?</string>
+    <string name="settings_no_network_alert" tools:ignore="MissingTranslation">View settings</string>
+    <string name="no_web_browser" tools:ignore="MissingTranslation">No web browser found to open that web page.</string>
+    <string name="no_wireless_settings" tools:ignore="MissingTranslation">Unable to open wireless settings</string>
+    <string name="quit_no_network_alert" tools:ignore="MissingTranslation">Quit</string>
+    <string name="try_again_no_network_alert" tools:ignore="MissingTranslation">Try again</string>
+    <string name="check_again_location_alert" tools:ignore="MissingTranslation">Check location again</string>
+    <string name="no_json_message" tools:ignore="MissingTranslation">Could not retrieve exhibit record.  Using default version.</string>
+    <string name="invalid_history_entry_message" tools:ignore="MissingTranslation">Something went wrong.</string>
+    <string name="fab_camera_content_description" tools:ignore="MissingTranslation">Click to scan a barcode</string>
+    <string name="widget_title" tools:ignore="MissingTranslation">JFK Hyannis Museum</string>
 
 </resources>

@@ -20,7 +20,7 @@ as explained here:
 https://developer.android.com/training/basics/fragments/communicating
 https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
  */
-class FragmentSharedViewModel extends ViewModel {
+public class FragmentSharedViewModel extends ViewModel {
     private final static String LOG_TAG = "FragmentSharedViewModel";
     /* This ViewModel will hold a LiveData that contains a Hashtable of
      * <pieceId, resource> to indicate what ExhibitResource has been selected for each pieceId
