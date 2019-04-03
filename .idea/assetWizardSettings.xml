@@ -23,7 +23,8 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="scalingPercent" value="58" />
+                                                <entry key="scalingPercent" value="70" />
+                                                <entry key="trimmed" value="true" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -34,11 +35,9 @@
                                   <option name="values">
                                     <map>
                                       <entry key="backgroundAssetType" value="COLOR" />
-                                      <entry key="backgroundColor" value="ffffff" />
-                                      <entry key="backgroundLayerName" value="ic_launcher_background" />
-                                      <entry key="foregroundImage" value="D:\udacity\android_phase2\6Capstone\JFK_raw_media\jfk_fifty_cent.png" />
-                                      <entry key="foregroundLayerName" value="ic_launcher_foreground" />
-                                      <entry key="outputName" value="ic_launcher_jfk_fifty_cent" />
+                                      <entry key="backgroundColor" value="3269a1" />
+                                      <entry key="foregroundImage" value="D:\udacity\android_phase2\6Capstone\JFK_raw_media\jfk_app_icon.png" />
+                                      <entry key="previewDensity" value="MEDIUM" />
                                     </map>
                                   </option>
                                 </PersistentState>
