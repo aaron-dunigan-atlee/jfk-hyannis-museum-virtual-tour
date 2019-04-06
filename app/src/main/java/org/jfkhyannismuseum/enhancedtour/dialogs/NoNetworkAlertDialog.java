@@ -65,7 +65,7 @@ public class NoNetworkAlertDialog extends DialogFragment {
         } catch (ClassCastException e) {
             // The activity doesn't implement the interface, throw exception
             throw new ClassCastException(context.toString()
-                    + " must implement LocationAlertListener");
+                    + " must implement NoNetworkAlertListener");
         }
     }
 }

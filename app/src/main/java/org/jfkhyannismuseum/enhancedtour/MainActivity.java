@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import android.view.SubMenu;
 import android.view.View;
 import android.widget.Toast;
 
+import org.jfkhyannismuseum.enhancedtour.dialogs.DbExpiredAlertDialog;
 import org.jfkhyannismuseum.enhancedtour.dialogs.LocationAlertDialog;
 import org.jfkhyannismuseum.enhancedtour.dialogs.NoNetworkAlertDialog;
 import org.jfkhyannismuseum.enhancedtour.database.AppDatabase;
@@ -62,7 +64,8 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         LocationAlertDialog.LocationAlertListener,
-        NoNetworkAlertDialog.NoNetworkAlertListener {
+        NoNetworkAlertDialog.NoNetworkAlertListener,
+        DbExpiredAlertDialog.DbExpiredAlertListener {
 
     // Global constants.
     private static final int REQUEST_CAMERA_IMAGE = 1; // Request code for launching camera app
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity
     private static final int HISTORY_END = -1;
     private static final String LOCATION_FRAGMENT_TAG = "location";
     private static final String NO_NETWORK_FRAGMENT_TAG = "no_network";
+    private static final String DB_EXPIRED_FRAGMENT_TAG = "db_expired";
     private static final String NO_NETWORK_WARNING = "Network is not available.";
     private static final String LOG_TAG = "Main Activity";
     private static final String TEMP_PHOTO_PATH = "temp_photo_path";
@@ -126,6 +130,9 @@ public class MainActivity extends AppCompatActivity
 
         // Get instance of viewing history database.
         mHistoryDb = AppDatabase.getInstance(getApplication());
+
+        // Find out if time limit for viewing exhibits has expired.
+        checkDatabaseAge();
 
         // Set up ActionBar toggle
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -189,6 +196,18 @@ public class MainActivity extends AppCompatActivity
         if (!NetworkUtils.deviceIsConnected(this)) {
             DialogFragment noNetworkAlertDialog = new NoNetworkAlertDialog();
             noNetworkAlertDialog.show(getSupportFragmentManager(), NO_NETWORK_FRAGMENT_TAG);
+        }
+    }
+
+    private void checkDatabaseAge() {
+        int maxViewingDays = getResources().getInteger(R.integer.max_viewing_days);
+        long daysSinceVisit = PreferenceUtils.getDaysSinceLastVisit(this);
+        Log.d("VisitDate",Long.toString(daysSinceVisit)+" days since last visit.");
+        if (daysSinceVisit > maxViewingDays) {
+            Log.d("VisitDate","Database expired.");
+            DialogFragment dbExpiredDialog = new DbExpiredAlertDialog();
+            dbExpiredDialog.show(getSupportFragmentManager(), DB_EXPIRED_FRAGMENT_TAG);
+            deleteDatabase();
         }
     }
 
@@ -294,8 +313,13 @@ public class MainActivity extends AppCompatActivity
             // Extract the barcode and use its information.
             Integer pieceId = ImageUtils.getBarcodeFromImage(this, mTempPhotoPath);
             if (pieceId == null) {
+                // Couldn't read the barcode.
                 Toast.makeText(this, getString(R.string.invalid_barcode), Toast.LENGTH_LONG).show();
             } else {
+                // Got a barcode, so update the database to add this exhibit piece to the viewing history.
+                // Also set the viewing date for purpose of deleting database after 30 days.
+                PreferenceUtils.setPreferenceLastMuseumVisitDate(this);
+                Log.d("VisitDate","Museum visit date was set.");
                 updateDatabase(pieceId);
             }
         } else {
@@ -669,4 +693,13 @@ public class MainActivity extends AppCompatActivity
         public void onPageScrollStateChanged(int arg0) { }
     };
 
+    private void deleteDatabase() {
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("DBViewModel", "Deleting history.");
+                mHistoryDb.historyDao().deleteHistory();
+            }
+        });
+    }
 }

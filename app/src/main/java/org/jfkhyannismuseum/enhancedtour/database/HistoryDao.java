@@ -2,6 +2,7 @@ package org.jfkhyannismuseum.enhancedtour.database;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
@@ -27,4 +28,8 @@ public interface HistoryDao {
     // and https://stackoverflow.com/questions/46804775/room-persistence-library-and-content-provider
     @Query("SELECT * FROM history")
     List<HistoryEntry> loadHistoryList();
+
+    // See https://stackoverflow.com/a/48261330/10332984
+    @Query("DELETE FROM history")
+    void deleteHistory();
 }
