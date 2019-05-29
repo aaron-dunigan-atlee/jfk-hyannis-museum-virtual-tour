@@ -160,9 +160,10 @@ public class MediaPlayerFragment extends Fragment {
             mExoPlayer.setPlayWhenReady(autoPlay);
             mExoPlayer.seekTo(windowIndex, playbackPosition);
         }
+
         // Taking advantage of the way if statements are processed with ||
         // see https://stackoverflow.com/questions/1795808/and-and-or-in-if-statements
-        if (backgroundUrl == null || backgroundUrl.equals(DEFAULT_BACKGROUND)) {
+        if (backgroundUrl == null || backgroundUrl.equals(DEFAULT_BACKGROUND) || backgroundUrl.equals("")) {
             // Use default background.
             Log.d("intitalizePlayer","Setting default artwork.");
             mExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource

@@ -166,6 +166,75 @@
         "type":"audio",
         "text":"On June 4, 1966 Bobby and Ethel Kennedy arrived in Johannesburg, South Africa for a six-day trip that would prove to change the lives of many whom Kennedy encountered.\nOn June 6th at the University of Cape Town, he delivered an impassioned speech against the regime of Apartheid. Sixteen hundred students, and thousands of others outside in the cold, listened as he denounced the subjugation of South Africa's black citizens and promoted democracy and civil rights. That famous speech became known as \"Ripple of Hope.\""
       }]
+    },
+    {"id":1006,
+      "title":"The Presidential Campaign",
+      "resources":[{
+        "title":"Kennedy's candidacy",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1006_01.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1006_01.jpg",
+        "type":"audio",
+        "text":"Robert F. Kennedy announced his candidacy for President on March 16, 1968. He then plunged into a demanding schedule of appearances to win the Democratic Presidential primaries throughout the United States."
+      },{
+        "title":"The campaign trail",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1006_02.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1006_02.jpg",
+        "type":"audio",
+        "text":"He had boundless energy on the campaign trail. From college campuses to inner city neighborhoods, his message of social justice and civil rights ignited the hopes of many Americans."
+      },{
+        "title":"Challenge and hope",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1006_03.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1006_03.jpg",
+        "type":"audio",
+        "text":"At rallies and open car motorcades in primary election states, throngs of people responded enthusiastically to Kennedy's message of challenge and hope. Excitement and momentum built as he won nearly all of the primaries. Finally, he redoubled his efforts in the last and most crucial contest and the greatest prize, the California Democratic Presidential Primary. Surging crowds followed him as he campaigned throughout the state for an intense month."
+      },{
+        "title":"Final campaign day",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1006_04.mp4",
+        "background_image_URL":"",
+        "type":"video",
+        "text":"June 3rd, the last day of the race, was long and arduous. For twelve hours, Kennedy went from Los Angeles to San Francisco to Long Beach, through Watts, then to San Diego for a late-night rally, before finally heading back to Los Angeles. He expended every ounce of his considerable energy and finished the day exhausted."
+      },{
+        "title":"Victory",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1006_05.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1006_05.jpg",
+        "type":"audio",
+        "text":"Bobby's herculean efforts were rewarded by victory. On June 5th he won the California Democratic Presidential Primary."
+      },{
+        "title":"Tragedy",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1006_06.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1006_06.jpg",
+        "type":"audio",
+        "text":"The campaign ended in tragedy: Robert F. Kennedy was shot by an assassin at the victory event, and died on June 6, 1968."
+      }
+      ]
+    },
+    {"id":1007,
+      "title":"Robert Kennedy's Funeral",
+      "resources":[{
+        "title":"The funeral train",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1007_01.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1007_01.jpg",
+        "type":"audio",
+        "text":"After Robert Kennedy's funeral at Saint Patrick's Cathedral in New York, his coffin was carried by funeral train to Washington, D.C. Hundreds of thousands of mourners lined the tracks in cities and towns along the route. They stood silently and for hours waiting to pay their respects."
+      },
+        {
+          "title":"Burial",
+          "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1007_02.mp3",
+          "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1007_02.jpg",
+          "type":"audio",
+          "text":"When the train arrived at Union Station, a large crowd broke into \"The Battle Hymn of the Republic,\" his favorite anthem. Robert F. Kennedy was buried at Arlington National Cemetery that night, close to his brother."
+        }]
+    },
+    {"id":1008,
+      "title":"\"The Greatness to Bend History\"",
+      "resources":[{
+        "title":"\"...the greatness to bend history...\"",
+        "resource_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1008_01.mp3",
+        "background_image_URL":"https://jfkhyannismuseum.org/wp-content/mobile-app-data/rfk_1008_01.jpg",
+        "type":"audio",
+        "text":"\"Few will have the greatness to bend history itself, but each of us can work to change a small portion of events, and in the total of all those acts, will be written the history of this generation.\"\n– Robert F. Kennedy, June 6, 1966"
+      }]
     }
+
 ]}
   ]}

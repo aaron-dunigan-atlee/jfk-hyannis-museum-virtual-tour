@@ -50,8 +50,8 @@
     <string name="invalid_history_entry_message" tools:ignore="MissingTranslation">Something went wrong.</string>
     <string name="fab_camera_content_description" tools:ignore="MissingTranslation">Click to scan a barcode</string>
     <string name="widget_title" tools:ignore="MissingTranslation">JFK Hyannis Museum</string>
-    <string name="db_expired_alert_message">Thank you for visiting the JFK Hyannis Museum. The time limit for the extended tour has passed, so you will no longer be able to view exhibits from your past museum visit.  We invite you to join us at the museum again!</string>
-    <string name="db_expired_alert_title">Exhibit viewing expired</string>
-    <string name="ok_db_expired_alert">OK</string>
+    <string name="db_expired_alert_message" tools:ignore="MissingTranslation">Thank you for visiting the JFK Hyannis Museum. The time limit for the extended tour has passed, so you will no longer be able to view exhibits from your past museum visit.  We invite you to join us at the museum again!</string>
+    <string name="db_expired_alert_title" tools:ignore="MissingTranslation">Exhibit viewing expired</string>
+    <string name="ok_db_expired_alert" tools:ignore="MissingTranslation">OK</string>
 
 </resources>

@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class PreferenceUtils {
     // Set this to true for debugging purposes to simulate that 30 days have passed.
-    private static final boolean DB_HAS_EXPIRED = true;
+    private static final boolean DB_HAS_EXPIRED = false;
 
     private static final String EXHIBITS_JSON_KEY = "exhibits_json_key";
     private static final String LAST_VISIT_DATE_KEY = "last_visit_date_key";
